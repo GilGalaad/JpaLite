@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="WARN">
+    <Properties>
+        <!-- presets -->
+        <Property name="datetime_pattern" value="dd/MM/yyyy HH:mm:ss.SSS"/>
+        <Property name="no_pattern" value="%msg%n"/>
+        <Property name="simple_pattern" value="[%d{${sys:datetime_pattern}} %5level] %msg%n"/>
+        <Property name="standard_pattern" value="[%d{${sys:datetime_pattern}} %5level %logger{1}] %msg%n"/>
+        <Property name="location_pattern" value="[%d{${sys:datetime_pattern}} %5level %logger{1} %class{1}.%method:%line] %msg%n"/>
+        <!-- chosen pattern -->
+        <Property name="log.pattern" value="${sys:standard_pattern}"/>
+    </Properties>
+    <appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${sys:log.pattern}"/>
+        </Console>
+    </appenders>
+    <loggers>
+        <root level="ALL">
+            <appender-ref ref="Console" level="ALL"/>
+        </root>
+    </loggers>
+</configuration>
