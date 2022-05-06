@@ -1,7 +1,7 @@
 package org.jpalite;
 
 import lombok.extern.log4j.Log4j2;
-import org.jpalite.model.MyTable;
+import org.jpalite.model.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TestSuite {
 
     private static Connection conn;
-    private static final EntityManager em = new EntityManager();
+    private final EntityManager em = new EntityManager();
 
     @BeforeAll
     static void init() throws SQLException {
@@ -68,7 +68,6 @@ public class TestSuite {
     @AfterAll
     static void cleanup() throws SQLException {
         if (conn != null) {
-            conn.setAutoCommit(true);
             dropSchema();
             log.info("Closing database connection");
             conn.close();
@@ -79,6 +78,13 @@ public class TestSuite {
     @Test
     void testGetResultListAsBean() throws SQLException {
         List<MyTable> rs = em.getResultList(conn, MyTable.class, "SELECT * FROM my_table ORDER BY 1 LIMIT 5");
+        rs.forEach(log::info);
+    }
+
+    @DisplayName("Fetching list of rows as bean with primitive fields")
+    @Test
+    void testGetResultListAsBeaWithPrimitivesn() throws SQLException {
+        List<MyTableWithPrimitives> rs = em.getResultList(conn, MyTableWithPrimitives.class, "SELECT * FROM my_table ORDER BY 1 LIMIT 5");
         rs.forEach(log::info);
     }
 
@@ -109,7 +115,8 @@ public class TestSuite {
         Exception ex = assertThrows(SQLException.class, () -> {
             List<MyTable> rs = em.getResultList(conn, MyTable.class, "SELECT * FROM my_table WHERE string_col = ? ORDER BY 1 LIMIT 5");
         });
-        assertTrue(ex.getMessage().startsWith("Query needs") && ex.getMessage().endsWith("were provided"));
+        log.error(ex.getMessage());
+        assertEquals("Query needs 1 parameters but 0 were provided", ex.getMessage());
     }
 
     @DisplayName("Fetching too many rows")
@@ -123,17 +130,6 @@ public class TestSuite {
 
     @DisplayName("Fetching single scalar value")
     @Test
-    void testSingleResultScalar() throws SQLException {
-        Long count = em.getSingleResult(conn, Long.class, "SELECT COUNT(*) FROM my_table");
-        log.info("Count: {}", count);
-        List<String> distinct = em.getResultList(conn, String.class, "SELECT DISTINCT string_col FROM my_table ORDER BY 1 LIMIT 5");
-        log.info("Distinct values: {}", distinct);
-        String value = em.getSingleResult(conn, String.class, "SELECT string_col FROM my_table WHERE 1=2");
-        log.info("Null result: {}", value);
-    }
-
-    @DisplayName("Fetching all kind of scalar values")
-    @Test
     void testAllScalars() throws SQLException {
         String stringVal = em.getSingleResult(conn, String.class, "SELECT string_col FROM my_table ORDER BY 1 LIMIT 1");
         Short shortVal = em.getSingleResult(conn, Short.class, "SELECT int_col FROM my_table ORDER BY 1 LIMIT 1");
@@ -143,13 +139,21 @@ public class TestSuite {
         Object objectVal = em.getSingleResult(conn, Object.class, "SELECT string_col FROM my_table ORDER BY 1 LIMIT 1");
     }
 
+    @DisplayName("Fetching single null value")
+    @Test
+    void testNullScalar() throws SQLException {
+        Object objectVal = em.getSingleResult(conn, Object.class, "SELECT my_key FROM my_table WHERE 1=2");
+        assertNull(objectVal);
+    }
+
     @DisplayName("Fetching unsupported scalar value")
     @Test
     void testUnsupportedScalar() {
         Exception ex = assertThrows(SQLException.class, () -> {
             EntityManager objectVal = em.getSingleResult(conn, EntityManager.class, "SELECT string_col FROM my_table ORDER BY 1 LIMIT 1");
         });
-        assertTrue(ex.getMessage().startsWith("Unsupported column processor for class"));
+        log.error(ex.getMessage());
+        assertEquals("Unsupported column processor for class EntityManager", ex.getMessage());
     }
 
     @DisplayName("Column number mismatch")
@@ -158,7 +162,29 @@ public class TestSuite {
         Exception ex = assertThrows(SQLException.class, () -> {
             MyTable rs = em.getSingleResult(conn, MyTable.class, "SELECT my_key, string_col FROM my_table ORDER BY 1 LIMIT 1");
         });
-        assertTrue(ex.getMessage().startsWith("ResultSet has"));
+        assertEquals("ResultSet has 2 columns but MyTable has 4 fields", ex.getMessage());
+    }
+
+    @DisplayName("Wrong entities mismatch")
+    @Test
+    void testWrongEntities() {
+        Exception ex = assertThrows(SQLException.class, () -> {
+            MyTableWithoutConstructor rs = em.getSingleResult(conn, MyTableWithoutConstructor.class, "SELECT * FROM my_table ORDER BY 1 LIMIT 1");
+        });
+        log.error(ex.getMessage());
+        assertEquals("No default constructor found in class MyTableWithoutConstructor", ex.getMessage());
+
+        ex = assertThrows(SQLException.class, () -> {
+            MyTableWithUnmappedField rs = em.getSingleResult(conn, MyTableWithUnmappedField.class, "SELECT * FROM my_table ORDER BY 1 LIMIT 1");
+        });
+        log.error(ex.getMessage());
+        assertEquals("No suitable field found in class MyTableWithUnmappedField to map column string_col", ex.getMessage());
+
+        ex = assertThrows(SQLException.class, () -> {
+            MyTableWithoutSetter rs = em.getSingleResult(conn, MyTableWithoutSetter.class, "SELECT * FROM my_table ORDER BY 1 LIMIT 1");
+        });
+        log.error(ex.getMessage());
+        assertEquals("No suitable setter method found for field myKey", ex.getMessage());
     }
 
 }

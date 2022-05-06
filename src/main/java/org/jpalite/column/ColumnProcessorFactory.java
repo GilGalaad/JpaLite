@@ -25,7 +25,7 @@ public class ColumnProcessorFactory {
             case "java.lang.Object":
                 return new ObjectProcessor();
             default:
-                throw new SQLException(String.format("Unsupported column processor for class %s", clazz.getName()));
+                throw new SQLException(String.format("Unsupported column processor for class %s", clazz.getSimpleName()));
         }
     }
 

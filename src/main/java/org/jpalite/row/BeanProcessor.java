@@ -31,8 +31,9 @@ public class BeanProcessor<T> implements RowProcessor<T> {
         BeanInfo beanInfo = getBeanInfo(clazz);
         List<PropertyDescriptor> propertyDescriptors = Arrays.asList(beanInfo.getPropertyDescriptors());
 
-        if (rsmd.getColumnCount() != beanFields.stream().filter(i -> !"__$lineHits$__".equals(i.getName())).count()) {
-            throw new SQLException(String.format("ResultSet has %d columns but %s has %d fields", rsmd.getColumnCount(), clazz.getSimpleName(), beanFields.size()));
+        long beanFieldsCount = beanFields.stream().filter(i -> !"__$lineHits$__".equals(i.getName())).count();
+        if (rsmd.getColumnCount() != beanFieldsCount) {
+            throw new SQLException(String.format("ResultSet has %d columns but %s has %d fields", rsmd.getColumnCount(), clazz.getSimpleName(), beanFieldsCount));
         }
 
         for (int i = 0; i < rsmd.getColumnCount(); i++) {
