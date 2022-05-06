@@ -83,8 +83,8 @@ public class TestSuite {
 
     @DisplayName("Fetching list of rows as bean with primitive fields")
     @Test
-    void testGetResultListAsBeaWithPrimitivesn() throws SQLException {
-        List<MyTableWithPrimitives> rs = em.getResultList(conn, MyTableWithPrimitives.class, "SELECT * FROM my_table ORDER BY 1 LIMIT 5");
+    void testGetResultListAsBeanWithPrimitives() throws SQLException {
+        List<MyTableWithPrimitives> rs = em.getResultList(conn, MyTableWithPrimitives.class, "SELECT * FROM my_table WHERE int_col IS NOT NULL ORDER BY 1 LIMIT 5");
         rs.forEach(log::info);
     }
 
@@ -100,23 +100,6 @@ public class TestSuite {
     void testSingleResult() throws SQLException {
         MyTable rs = em.getSingleResult(conn, MyTable.class, "SELECT * FROM my_table ORDER BY 1 LIMIT 1");
         log.info(rs);
-    }
-
-    @DisplayName("Usage of parameters")
-    @Test
-    void testGetResultListWithParams() throws SQLException {
-        List<MyTable> rs = em.getResultList(conn, MyTable.class, "SELECT * FROM my_table WHERE string_col = ? ORDER BY 1 LIMIT 5", "value2");
-        rs.forEach(log::info);
-    }
-
-    @DisplayName("Missing parameters")
-    @Test
-    void testErrorGetResultListWithParams() {
-        Exception ex = assertThrows(SQLException.class, () -> {
-            List<MyTable> rs = em.getResultList(conn, MyTable.class, "SELECT * FROM my_table WHERE string_col = ? ORDER BY 1 LIMIT 5");
-        });
-        log.error(ex.getMessage());
-        assertEquals("Query needs 1 parameters but 0 were provided", ex.getMessage());
     }
 
     @DisplayName("Fetching too many rows")
@@ -139,13 +122,6 @@ public class TestSuite {
         Object objectVal = em.getSingleResult(conn, Object.class, "SELECT string_col FROM my_table ORDER BY 1 LIMIT 1");
     }
 
-    @DisplayName("Fetching single null value")
-    @Test
-    void testNullScalar() throws SQLException {
-        Object objectVal = em.getSingleResult(conn, Object.class, "SELECT my_key FROM my_table WHERE 1=2");
-        assertNull(objectVal);
-    }
-
     @DisplayName("Fetching unsupported scalar value")
     @Test
     void testUnsupportedScalar() {
@@ -154,6 +130,52 @@ public class TestSuite {
         });
         log.error(ex.getMessage());
         assertEquals("Unsupported column processor for class EntityManager", ex.getMessage());
+    }
+
+    @DisplayName("Fetching single null value")
+    @Test
+    void testNullScalar() throws SQLException {
+        Object value = em.getSingleResult(conn, Object.class, "SELECT my_key FROM my_table WHERE 1=2");
+        assertNull(value);
+    }
+
+    @DisplayName("Usage of parameters")
+    @Test
+    void testUsageOfParameters() throws SQLException {
+        List<MyTable> rs = em.getResultList(conn, MyTable.class, "SELECT * FROM my_table WHERE string_col = ? ORDER BY 1 LIMIT 5", "value2");
+        rs.forEach(log::info);
+    }
+
+    @DisplayName("Missing parameters")
+    @Test
+    void testErrorGetResultListWithParams() {
+        Exception ex = assertThrows(SQLException.class, () -> {
+            List<MyTable> rs = em.getResultList(conn, MyTable.class, "SELECT * FROM my_table WHERE string_col = ? ORDER BY 1 LIMIT 5");
+        });
+        log.error(ex.getMessage());
+        assertEquals("Query needs 1 parameters but 0 were provided", ex.getMessage());
+    }
+
+    @DisplayName("Fetching nulls on primitive types")
+    @Test
+    void testNullsOnPrimitives() {
+        Exception ex = assertThrows(SQLException.class, () -> {
+            List<MyTableWithPrimitives> rs = em.getResultList(conn, MyTableWithPrimitives.class, "SELECT * FROM my_table WHERE int_col IS NULL ORDER BY 1 LIMIT 5");
+        });
+        log.error(ex.getMessage());
+        assertEquals("Cannot assign null value to a primitive type for column int_col", ex.getMessage());
+
+        ex = assertThrows(SQLException.class, () -> {
+            int value = em.getSingleResult(conn, Integer.TYPE, "SELECT int_col FROM my_table WHERE int_col IS NULL");
+        });
+        log.error(ex.getMessage());
+        assertEquals("Cannot assign null value to a primitive type for column int_col", ex.getMessage());
+
+        ex = assertThrows(SQLException.class, () -> {
+            int[] value = em.getSingleResult(conn, int[].class, "SELECT my_key, int_col FROM my_table WHERE int_col IS NULL");
+        });
+        log.error(ex.getMessage());
+        assertEquals("Cannot assign null value to a primitive type for column int_col", ex.getMessage());
     }
 
     @DisplayName("Column number mismatch")

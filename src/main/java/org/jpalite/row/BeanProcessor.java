@@ -21,11 +21,11 @@ import java.util.List;
 public class BeanProcessor<T> implements RowProcessor<T> {
 
     private final Class<T> clazz;
-    private final List<ColumnMetaData> cpmds;
+    private final List<ColumnMetaData> cmds;
 
     public BeanProcessor(Class<T> clazz, ResultSetMetaData rsmd) throws SQLException {
         this.clazz = clazz;
-        this.cpmds = new ArrayList<>(rsmd.getColumnCount());
+        this.cmds = new ArrayList<>(rsmd.getColumnCount());
 
         List<Field> beanFields = Arrays.asList(clazz.getDeclaredFields());
         BeanInfo beanInfo = getBeanInfo(clazz);
@@ -59,9 +59,8 @@ public class BeanProcessor<T> implements RowProcessor<T> {
                 throw new SQLException(String.format("No suitable setter method found for field %s", fieldName));
             }
 
-            cpmds.add(column);
+            cmds.add(column);
         }
-        //cpmds.forEach(log::info);
     }
 
     @Override
@@ -73,15 +72,15 @@ public class BeanProcessor<T> implements RowProcessor<T> {
             throw new SQLException(String.format("No default constructor found in class %s", clazz.getSimpleName()), ex);
         }
 
-        for (var column : cpmds) {
-            Object value = column.getColumnProcessor().process(rs, column.getColumnIndex());
+        for (var cmd : cmds) {
+            Object value = cmd.getColumnProcessor().process(rs, cmd.getColumnIndex());
             try {
-                if (column.isPrimitive() && value == null) {
-                    continue;
+                if (cmd.isPrimitive() && value == null) {
+                    throw new SQLException(String.format("Cannot assign null value to a primitive type for column %s", cmd.getColumnName()));
                 }
-                column.getWriteMethod().invoke(ret, value);
+                cmd.getWriteMethod().invoke(ret, value);
             } catch (IllegalAccessException | InvocationTargetException ex) {
-                throw new SQLException(String.format("Error invoking setter method %s", column.getWriteMethod()));
+                throw new SQLException(String.format("Error invoking setter method %s", cmd.getWriteMethod()));
             }
         }
         return ret;
