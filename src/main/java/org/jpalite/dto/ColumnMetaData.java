@@ -1,4 +1,4 @@
-package org.jpalite.row;
+package org.jpalite.dto;
 
 import lombok.Data;
 import org.jpalite.column.ColumnProcessor;

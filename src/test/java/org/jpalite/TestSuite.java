@@ -35,12 +35,12 @@ public class TestSuite {
 
     static void createSchema() throws SQLException {
         try (Statement stmt = conn.createStatement()) {
-            stmt.execute("CREATE TABLE IF NOT EXISTS public.my_table ("
-                         + "my_key BIGINT PRIMARY KEY,"
-                         + "string_col TEXT,"
-                         + "int_col INTEGER,"
-                         + "timestamp_col TIMESTAMP(3)"
-                         + ")");
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS public.my_table ("
+                               + "my_key INTEGER PRIMARY KEY,"
+                               + "string_col TEXT,"
+                               + "int_col INTEGER,"
+                               + "timestamp_col TIMESTAMP(3)"
+                               + ")");
         }
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO public.my_table VALUES (?,?,?,?)")) {
             stmt.setLong(1, 1L);
@@ -60,7 +60,8 @@ public class TestSuite {
 
     static void dropSchema() throws SQLException {
         try (Statement stmt = conn.createStatement()) {
-            stmt.execute("DROP TABLE IF EXISTS public.my_table");
+            stmt.executeUpdate("DROP TABLE IF EXISTS public.my_table");
+            stmt.executeUpdate("DROP TABLE IF EXISTS public.my_table2");
         }
         conn.commit();
     }
@@ -126,7 +127,7 @@ public class TestSuite {
     @Test
     void testUnsupportedScalar() {
         Exception ex = assertThrows(SQLException.class, () -> {
-            EntityManager objectVal = em.getSingleResult(conn, EntityManager.class, "SELECT string_col FROM my_table ORDER BY 1 LIMIT 1");
+            EntityManager rs = em.getSingleResult(conn, EntityManager.class, "SELECT string_col FROM my_table ORDER BY 1 LIMIT 1");
         });
         log.error(ex.getMessage());
         assertEquals("Unsupported column processor for class EntityManager", ex.getMessage());
@@ -207,6 +208,19 @@ public class TestSuite {
         });
         log.error(ex.getMessage());
         assertEquals("No suitable setter method found for field myKey", ex.getMessage());
+    }
+
+    @DisplayName("Executing arbitrary statements")
+    @Test
+    void testExecute() throws SQLException {
+        em.execute(conn, "CREATE TABLE IF NOT EXISTS public.my_table2 (my_key INTEGER)");
+        em.execute(conn, "INSERT INTO my_table2 VALUES (?)", 10);
+        int count = em.getSingleResult(conn, Integer.class, "SELECT COUNT(*) FROM my_table2");
+        assertEquals(1, count);
+        int value = em.getSingleResult(conn, Integer.class, "SELECT my_key FROM my_table2 LIMIT 1");
+        assertEquals(10, value);
+        em.execute(conn, "DROP TABLE public.my_table2");
+        conn.commit();
     }
 
 }

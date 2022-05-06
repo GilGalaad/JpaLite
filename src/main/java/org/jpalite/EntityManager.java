@@ -14,6 +14,10 @@ public class EntityManager {
 
     private static final int DEFAULT_FETCH_SIZE = 10_000;
 
+    public <T> List<T> getResultList(Connection conn, Class<T> clazz, String sql, Object... params) throws SQLException {
+        return getResultList(conn, DEFAULT_FETCH_SIZE, clazz, sql, params);
+    }
+
     public <T> List<T> getResultList(Connection conn, int fetchSize, Class<T> clazz, String sql, Object... params) throws SQLException {
         List<T> ret = new ArrayList<>();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -27,10 +31,6 @@ public class EntityManager {
             }
         }
         return ret.isEmpty() ? Collections.emptyList() : ret;
-    }
-
-    public <T> List<T> getResultList(Connection conn, Class<T> clazz, String sql, Object... params) throws SQLException {
-        return getResultList(conn, DEFAULT_FETCH_SIZE, clazz, sql, params);
     }
 
     public <T> T getSingleResult(Connection conn, Class<T> clazz, String sql, Object... params) throws SQLException {
@@ -49,6 +49,13 @@ public class EntityManager {
                     return null;
                 }
             }
+        }
+    }
+
+    public long execute(Connection conn, String sql, Object... params) throws SQLException {
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            fillParameters(stmt, params);
+            return stmt.executeLargeUpdate();
         }
     }
 
