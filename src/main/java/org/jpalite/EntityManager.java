@@ -6,10 +6,7 @@ import org.jpalite.dml.SqlProcessor;
 import org.jpalite.row.RowProcessor;
 import org.jpalite.row.RowProcessorFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -71,7 +68,8 @@ public class EntityManager {
         EntityProcessor<?> ep = new EntityProcessor<>(obj.getClass());
         String sql = ep.generateInsertStatement();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            ep.fillInsertParameters(stmt, obj);
+            ParameterMetaData pmd = stmt.getParameterMetaData();
+            ep.fillInsertParameters(stmt, pmd, obj);
             stmt.executeUpdate();
         }
     }
@@ -91,8 +89,9 @@ public class EntityManager {
         EntityProcessor<?> ep = new EntityProcessor<>(objs.get(0).getClass());
         String sql = ep.generateInsertStatement();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ParameterMetaData pmd = stmt.getParameterMetaData();
             for (var obj : objs) {
-                ep.fillInsertParameters(stmt, obj);
+                ep.fillInsertParameters(stmt, pmd, obj);
                 stmt.addBatch();
             }
             stmt.executeBatch();
@@ -106,7 +105,8 @@ public class EntityManager {
         EntityProcessor<?> ep = new EntityProcessor<>(obj.getClass());
         String sql = ep.generateUpdateStatement();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            ep.fillUpdateParameters(stmt, obj);
+            ParameterMetaData pmd = stmt.getParameterMetaData();
+            ep.fillUpdateParameters(stmt, pmd, obj);
             stmt.executeUpdate();
         }
     }

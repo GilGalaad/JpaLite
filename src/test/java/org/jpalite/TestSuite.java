@@ -317,4 +317,44 @@ public class TestSuite {
         conn.rollback();
     }
 
+    @DisplayName("Testing batch inserting performance")
+    @Test
+    void testBatchInsertPerformance() throws SQLException {
+        long startTime, endTime;
+        int batchSize = 100_000;
+        int count;
+
+        startTime = System.nanoTime();
+        try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO public.my_table VALUES (?,?,?,?)")) {
+            for (int i = 0; i < batchSize; i++) {
+                stmt.setLong(1, 10L + i);
+                stmt.setString(2, "batch");
+                stmt.setNull(3, Types.INTEGER);
+                stmt.setNull(4, Types.TIMESTAMP);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        }
+        endTime = System.nanoTime();
+        count = em.getSingleResult(conn, Integer.class, "SELECT COUNT(*) FROM my_table WHERE string_col = ?", "batch");
+        assertEquals(batchSize, count);
+        log.info("Inserted {} rows with JDBC: {} ms", count, (endTime - startTime) / 1_000_000);
+        conn.rollback();
+
+        List<MyTable> entities = new ArrayList<>(batchSize);
+        for (int i = 0; i < batchSize; i++) {
+            MyTable entity = new MyTable();
+            entity.setMyKey(10L + i);
+            entity.setStringCol("batch");
+            entities.add(entity);
+        }
+        startTime = System.nanoTime();
+        em.batchInsert(conn, entities);
+        endTime = System.nanoTime();
+        count = em.getSingleResult(conn, Integer.class, "SELECT COUNT(*) FROM my_table WHERE string_col = ?", "batch");
+        assertEquals(batchSize, count);
+        log.info("Inserted {} rows with JpaLite: {} ms", count, (endTime - startTime) / 1_000_000);
+        conn.rollback();
+    }
+
 }

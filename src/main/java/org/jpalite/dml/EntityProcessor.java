@@ -72,8 +72,7 @@ public class EntityProcessor<T> {
                + ")";
     }
 
-    public void fillInsertParameters(PreparedStatement stmt, Object obj) throws SQLException {
-        ParameterMetaData pmd = stmt.getParameterMetaData();
+    public void fillInsertParameters(PreparedStatement stmt, ParameterMetaData pmd, Object obj) throws SQLException {
         List<Object> params = new ArrayList<>(cmds.size());
         for (var cmd : cmds) {
             params.add(invokeWrapper(cmd.getReadMethod(), obj));
@@ -96,8 +95,7 @@ public class EntityProcessor<T> {
                + idColumns.stream().map(i -> i.getColumnName() + " = ?").collect(Collectors.joining(" AND "));
     }
 
-    public void fillUpdateParameters(PreparedStatement stmt, Object obj) throws SQLException {
-        ParameterMetaData pmd = stmt.getParameterMetaData();
+    public void fillUpdateParameters(PreparedStatement stmt, ParameterMetaData pmd, Object obj) throws SQLException {
         List<Object> params = new ArrayList<>(cmds.size());
         for (var cmd : dataColumns) {
             params.add(invokeWrapper(cmd.getReadMethod(), obj));
