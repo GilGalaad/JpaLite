@@ -70,8 +70,22 @@ public class EntityManager {
         }
         EntityProcessor<?> ep = new EntityProcessor<>(obj.getClass());
         String sql = ep.generateInsertStatement();
+        log.info(sql);
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            ep.fillParameters(stmt, obj);
+            ep.fillInsertParameters(stmt, obj);
+            stmt.executeUpdate();
+        }
+    }
+
+    public void update(Connection conn, Object obj) throws SQLException {
+        if (obj == null) {
+            throw new SQLException("Entity object is null");
+        }
+        EntityProcessor<?> ep = new EntityProcessor<>(obj.getClass());
+        String sql = ep.generateUpdateStatement();
+        log.info(sql);
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ep.fillUpdateParameters(stmt, obj);
             stmt.executeUpdate();
         }
     }

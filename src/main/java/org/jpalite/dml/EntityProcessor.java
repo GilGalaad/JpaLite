@@ -8,7 +8,6 @@ import org.jpalite.dto.ColumnMetaData;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -24,6 +23,8 @@ public class EntityProcessor<T> {
 
     private final Class<T> clazz;
     private final List<ColumnMetaData> cmds;
+    private final List<ColumnMetaData> idColumns;
+    private final List<ColumnMetaData> dataColumns;
 
     public EntityProcessor(Class<T> clazz) throws SQLException {
         this.clazz = clazz;
@@ -52,6 +53,14 @@ public class EntityProcessor<T> {
 
             cmds.add(column);
         }
+        idColumns = cmds.stream().filter(ColumnMetaData::isId).collect(Collectors.toList());
+        dataColumns = cmds.stream().filter(i -> !i.isId()).collect(Collectors.toList());
+    }
+
+    private void validateEntity(Class<T> clazz) throws SQLException {
+        if (!clazz.isAnnotationPresent(Table.class)) {
+            throw new SQLException(String.format("Entity class %s must be @Table annotated", clazz.getSimpleName()));
+        }
     }
 
     public String generateInsertStatement() {
@@ -63,22 +72,40 @@ public class EntityProcessor<T> {
                + ")";
     }
 
-    private void validateEntity(Class<T> clazz) throws SQLException {
-        if (!clazz.isAnnotationPresent(Table.class)) {
-            throw new SQLException(String.format("Entity class %s must be @Table annotated", clazz.getSimpleName()));
+    public void fillInsertParameters(PreparedStatement stmt, Object obj) throws SQLException {
+        ParameterMetaData pmd = stmt.getParameterMetaData();
+        List<Object> params = new ArrayList<>(cmds.size());
+        for (var cmd : cmds) {
+            params.add(invokeWrapper(cmd.getReadMethod(), obj));
         }
+        DMLUtils.fillParameters(stmt, pmd, params.toArray());
     }
 
-    public void fillParameters(PreparedStatement stmt, Object obj) throws SQLException {
-        ParameterMetaData pmd = stmt.getParameterMetaData();
-        Object[] params = new Object[cmds.size()];
-        for (var cmd : cmds) {
-            try {
-                params[cmd.getColumnIndex() - 1] = cmd.getReadMethod().invoke(obj);
-            } catch (IllegalAccessException | InvocationTargetException ex) {
-                throw new SQLException(String.format("Error invoking setter method %s", cmd.getReadMethod()));
-            }
+    public String generateUpdateStatement() throws SQLException {
+        if (idColumns.isEmpty()) {
+            throw new SQLException(String.format("Entity class %s has no @Id annotated fields", clazz.getSimpleName()));
         }
-        DMLUtils.fillParameters(stmt, pmd, params);
+        if (dataColumns.isEmpty()) {
+            throw new SQLException(String.format("Entity class %s has only @Id annotated fields", clazz.getSimpleName()));
+        }
+        return "UPDATE "
+               + clazz.getAnnotation(Table.class).name()
+               + " SET "
+               + dataColumns.stream().map(i -> i.getColumnName() + " = ?").collect(Collectors.joining(", "))
+               + " WHERE "
+               + idColumns.stream().map(i -> i.getColumnName() + " = ?").collect(Collectors.joining(" AND "));
     }
+
+    public void fillUpdateParameters(PreparedStatement stmt, Object obj) throws SQLException {
+        ParameterMetaData pmd = stmt.getParameterMetaData();
+        List<Object> params = new ArrayList<>(cmds.size());
+        for (var cmd : dataColumns) {
+            params.add(invokeWrapper(cmd.getReadMethod(), obj));
+        }
+        for (var cmd : idColumns) {
+            params.add(invokeWrapper(cmd.getReadMethod(), obj));
+        }
+        DMLUtils.fillParameters(stmt, pmd, params.toArray());
+    }
+
 }

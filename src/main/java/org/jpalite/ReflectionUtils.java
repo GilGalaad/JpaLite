@@ -8,6 +8,8 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
@@ -55,6 +57,14 @@ public class ReflectionUtils {
             return Introspector.getBeanInfo(clazz);
         } catch (IntrospectionException ex) {
             throw new SQLException("Introspection of " + clazz.getSimpleName() + " class failed", ex);
+        }
+    }
+
+    public static Object invokeWrapper(Method method, Object obj, Object... args) throws SQLException {
+        try {
+            return method.invoke(obj, args);
+        } catch (IllegalAccessException | InvocationTargetException ex) {
+            throw new SQLException(String.format("Reflection error invoking method %s", method.toGenericString()), ex);
         }
     }
 

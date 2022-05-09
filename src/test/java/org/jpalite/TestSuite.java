@@ -223,18 +223,26 @@ public class TestSuite {
         conn.rollback();
     }
 
-    @DisplayName("Inserting entity")
+    @DisplayName("Inserting and updating entity")
     @Test
-    void testInsert() throws SQLException {
-        MyTable insert = new MyTable();
-        insert.setMyKey(10L);
-        insert.setStringCol("new value");
-        insert.setIntCol(null);
-        insert.setTimestampCol(new Date());
-        em.insert(conn, insert);
-        MyTable rs = em.getSingleResult(conn, MyTable.class, "SELECT * FROM my_table WHERE my_key = ?", insert.getMyKey());
+    void testInsertUpdate() throws SQLException {
+        MyTable entity = new MyTable();
+        entity.setMyKey(10L);
+        entity.setStringCol("value");
+        entity.setIntCol(null);
+        entity.setTimestampCol(new Date());
+        em.insert(conn, entity);
+        MyTable rs = em.getSingleResult(conn, MyTable.class, "SELECT * FROM my_table WHERE my_key = ?", entity.getMyKey());
         log.info(rs);
-        assertEquals(insert, rs);
+        assertEquals(entity, rs);
+
+        entity.setStringCol("new value");
+        entity.setIntCol(10);
+        entity.setTimestampCol(new Date());
+        em.update(conn, entity);
+        rs = em.getSingleResult(conn, MyTable.class, "SELECT * FROM my_table WHERE my_key = ?", entity.getMyKey());
+        log.info(rs);
+        assertEquals(entity, rs);
         conn.rollback();
     }
 
@@ -260,6 +268,18 @@ public class TestSuite {
         ex = assertThrows(SQLException.class, () -> em.insert(conn, new MyTableInvalidProperty()));
         log.error(ex.getMessage());
         assertEquals("Field timestampCol of entity class MyTableInvalidProperty is not a valid property", ex.getMessage());
+
+        ex = assertThrows(SQLException.class, () -> em.update(conn, null));
+        log.error(ex.getMessage());
+        assertEquals("Entity object is null", ex.getMessage());
+
+        ex = assertThrows(SQLException.class, () -> em.update(conn, new MyTableWithNoId()));
+        log.error(ex.getMessage());
+        assertEquals("Entity class MyTableWithNoId has no @Id annotated fields", ex.getMessage());
+
+        ex = assertThrows(SQLException.class, () -> em.update(conn, new MyTableWithAllId()));
+        log.error(ex.getMessage());
+        assertEquals("Entity class MyTableWithAllId has only @Id annotated fields", ex.getMessage());
 
         conn.rollback();
     }

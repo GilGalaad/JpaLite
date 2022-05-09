@@ -66,14 +66,10 @@ public class BeanProcessor<T> implements RowProcessor<T> {
 
         for (var cmd : cmds) {
             Object value = cmd.getColumnProcessor().process(rs, cmd.getColumnIndex());
-            try {
-                if (cmd.isPrimitive() && value == null) {
-                    throw new SQLException(String.format("Cannot assign null value to a primitive type for column %s", cmd.getColumnName()));
-                }
-                cmd.getWriteMethod().invoke(ret, value);
-            } catch (IllegalAccessException | InvocationTargetException ex) {
-                throw new SQLException(String.format("Error invoking setter method %s", cmd.getWriteMethod()));
+            if (cmd.isPrimitive() && value == null) {
+                throw new SQLException(String.format("Cannot assign null value to a primitive type for column %s", cmd.getColumnName()));
             }
+            invokeWrapper(cmd.getWriteMethod(), ret, value);
         }
         return ret;
     }
