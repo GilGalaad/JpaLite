@@ -70,10 +70,32 @@ public class EntityManager {
         }
         EntityProcessor<?> ep = new EntityProcessor<>(obj.getClass());
         String sql = ep.generateInsertStatement();
-        log.info(sql);
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             ep.fillInsertParameters(stmt, obj);
             stmt.executeUpdate();
+        }
+    }
+
+    public void batchInsert(Connection conn, List<?> objs) throws SQLException {
+        if (objs == null || objs.isEmpty()) {
+            throw new SQLException("Entity list is empty");
+        }
+        for (var obj : objs) {
+            if (obj == null) {
+                throw new SQLException("Entity list contains null objects");
+            }
+            if (!obj.getClass().equals(objs.get(0).getClass())) {
+                throw new SQLException("Entity list must contain objects of the same type");
+            }
+        }
+        EntityProcessor<?> ep = new EntityProcessor<>(objs.get(0).getClass());
+        String sql = ep.generateInsertStatement();
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            for (var obj : objs) {
+                ep.fillInsertParameters(stmt, obj);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
         }
     }
 
@@ -83,7 +105,6 @@ public class EntityManager {
         }
         EntityProcessor<?> ep = new EntityProcessor<>(obj.getClass());
         String sql = ep.generateUpdateStatement();
-        log.info(sql);
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             ep.fillUpdateParameters(stmt, obj);
             stmt.executeUpdate();

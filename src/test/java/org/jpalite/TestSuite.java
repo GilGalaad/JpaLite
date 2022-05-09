@@ -8,10 +8,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.sql.*;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -246,6 +244,25 @@ public class TestSuite {
         conn.rollback();
     }
 
+    @DisplayName("Batch inserting entities")
+    @Test
+    void testBatchInsert() throws SQLException {
+        List<MyTable> entities = new ArrayList<>();
+        int batchSize = 10;
+        for (int i = 0; i < batchSize; i++) {
+            MyTable entity = new MyTable();
+            entity.setMyKey(10L + i);
+            entity.setStringCol("batch");
+            entities.add(entity);
+        }
+        em.batchInsert(conn, entities);
+        int count = em.getSingleResult(conn, Integer.class, "SELECT COUNT(*) FROM my_table WHERE string_col = ?", "batch");
+        log.info(count);
+        assertEquals(batchSize, count);
+
+        conn.rollback();
+    }
+
     @DisplayName("Wrong entities in DML")
     @Test
     void testWrongEntitiesInDML() throws SQLException {
@@ -280,6 +297,22 @@ public class TestSuite {
         ex = assertThrows(SQLException.class, () -> em.update(conn, new MyTableWithAllId()));
         log.error(ex.getMessage());
         assertEquals("Entity class MyTableWithAllId has only @Id annotated fields", ex.getMessage());
+
+        ex = assertThrows(SQLException.class, () -> em.batchInsert(conn, null));
+        log.error(ex.getMessage());
+        assertEquals("Entity list is empty", ex.getMessage());
+
+        ex = assertThrows(SQLException.class, () -> em.batchInsert(conn, new ArrayList<MyTable>()));
+        log.error(ex.getMessage());
+        assertEquals("Entity list is empty", ex.getMessage());
+
+        ex = assertThrows(SQLException.class, () -> em.batchInsert(conn, Arrays.asList(new MyTable(), null)));
+        log.error(ex.getMessage());
+        assertEquals("Entity list contains null objects", ex.getMessage());
+
+        ex = assertThrows(SQLException.class, () -> em.batchInsert(conn, Arrays.asList(new MyTable(), new MyTableWithPrimitives())));
+        log.error(ex.getMessage());
+        assertEquals("Entity list must contain objects of the same type", ex.getMessage());
 
         conn.rollback();
     }
