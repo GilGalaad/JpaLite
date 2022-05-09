@@ -12,6 +12,7 @@ public class ColumnMetaData {
     private String columnName;
     private String fieldName;
     private boolean isPrimitive;
+    private boolean isId;
     private ColumnProcessor<?> columnProcessor;
     private Method readMethod;
     private Method writeMethod;

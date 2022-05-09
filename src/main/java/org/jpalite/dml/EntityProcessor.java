@@ -2,12 +2,14 @@ package org.jpalite.dml;
 
 import lombok.extern.log4j.Log4j2;
 import org.jpalite.annotation.Column;
+import org.jpalite.annotation.Id;
 import org.jpalite.annotation.Table;
 import org.jpalite.dto.ColumnMetaData;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -18,7 +20,7 @@ import java.util.stream.Collectors;
 import static org.jpalite.ReflectionUtils.*;
 
 @Log4j2
-public class EntityProcessor<T> extends AbstractDMLProcessor {
+public class EntityProcessor<T> {
 
     private final Class<T> clazz;
     private final List<ColumnMetaData> cmds;
@@ -39,6 +41,7 @@ public class EntityProcessor<T> extends AbstractDMLProcessor {
             column.setColumnName(columnName);
             String fieldName = field.getName();
             column.setFieldName(fieldName);
+            column.setId(field.isAnnotationPresent(Id.class));
 
             PropertyDescriptor propertyDescriptor = getPropertyDescriptorForField(propertyDescriptors, field);
             if (propertyDescriptor.getReadMethod() != null) {
@@ -67,6 +70,7 @@ public class EntityProcessor<T> extends AbstractDMLProcessor {
     }
 
     public void fillParameters(PreparedStatement stmt, Object obj) throws SQLException {
+        ParameterMetaData pmd = stmt.getParameterMetaData();
         Object[] params = new Object[cmds.size()];
         for (var cmd : cmds) {
             try {
@@ -75,6 +79,6 @@ public class EntityProcessor<T> extends AbstractDMLProcessor {
                 throw new SQLException(String.format("Error invoking setter method %s", cmd.getReadMethod()));
             }
         }
-        _fillParameters(stmt, stmt.getParameterMetaData(), params);
+        DMLUtils.fillParameters(stmt, pmd, params);
     }
 }

@@ -27,7 +27,7 @@ public class EntityManager {
         List<T> ret = new ArrayList<>();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setFetchSize(fetchSize);
-            new SqlProcessor().fillParameters(stmt, params);
+            SqlProcessor.fillParameters(stmt, params);
             try (ResultSet rs = stmt.executeQuery()) {
                 RowProcessor<T> rowProcessor = RowProcessorFactory.create(clazz, rs.getMetaData());
                 while (rs.next()) {
@@ -41,7 +41,7 @@ public class EntityManager {
     public <T> T getSingleResult(Connection conn, Class<T> clazz, String sql, Object... params) throws SQLException {
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setFetchSize(2);
-            new SqlProcessor().fillParameters(stmt, params);
+            SqlProcessor.fillParameters(stmt, params);
             try (ResultSet rs = stmt.executeQuery()) {
                 RowProcessor<T> rowProcessor = RowProcessorFactory.create(clazz, rs.getMetaData());
                 if (rs.next()) {
@@ -59,7 +59,7 @@ public class EntityManager {
 
     public long execute(Connection conn, String sql, Object... params) throws SQLException {
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            new SqlProcessor().fillParameters(stmt, params);
+            SqlProcessor.fillParameters(stmt, params);
             return stmt.executeLargeUpdate();
         }
     }
