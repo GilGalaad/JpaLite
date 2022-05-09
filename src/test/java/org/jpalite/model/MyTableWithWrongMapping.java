@@ -9,15 +9,16 @@ import java.util.Date;
 
 @Data
 @Table(name = "my_table")
-public class MyTableWithUnmappedField {
+public class MyTableWithWrongMapping {
 
     @Id
     @Column(name = "my_key")
     private Long myKey;
 
-    private String unmappedField;
+    @Column(name = "string_col")
+    private String stringCol;
 
-    @Column(name = "int_col")
+    @Column(name = "different_col")
     private Integer intCol;
 
     @Column(name = "timestamp_col")

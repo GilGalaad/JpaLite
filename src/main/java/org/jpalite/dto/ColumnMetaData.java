@@ -13,6 +13,7 @@ public class ColumnMetaData {
     private String fieldName;
     private boolean isPrimitive;
     private ColumnProcessor<?> columnProcessor;
+    private Method readMethod;
     private Method writeMethod;
 
 }

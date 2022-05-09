@@ -1,26 +1,33 @@
 package org.jpalite.model;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.jpalite.annotation.Column;
 import org.jpalite.annotation.Id;
 import org.jpalite.annotation.Table;
 
 import java.util.Date;
 
-@Data
 @Table(name = "my_table")
-public class MyTableWithUnmappedField {
+public class MyTableInvalidProperty {
 
     @Id
     @Column(name = "my_key")
+    @Getter
+    @Setter
     private Long myKey;
 
-    private String unmappedField;
+    @Column(name = "string_col")
+    @Getter
+    @Setter
+    private String stringCol;
 
     @Column(name = "int_col")
+    @Getter
+    @Setter
     private Integer intCol;
 
     @Column(name = "timestamp_col")
-    private Date timestampCol;
+    public Date timestampCol;
 
 }

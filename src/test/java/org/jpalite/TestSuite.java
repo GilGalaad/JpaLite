@@ -138,6 +138,9 @@ public class TestSuite {
     void testNullScalar() throws SQLException {
         Object value = em.getSingleResult(conn, Object.class, "SELECT my_key FROM my_table WHERE 1=2");
         assertNull(value);
+
+        MyTable rs = em.getSingleResult(conn, MyTable.class, "SELECT * FROM my_table WHERE 1=2");
+        assertNull(rs);
     }
 
     @DisplayName("Usage of parameters")
@@ -179,16 +182,7 @@ public class TestSuite {
         assertEquals("Cannot assign null value to a primitive type for column int_col", ex.getMessage());
     }
 
-    @DisplayName("Column number mismatch")
-    @Test
-    void testColumnNumberMismatch() {
-        Exception ex = assertThrows(SQLException.class, () -> {
-            MyTable rs = em.getSingleResult(conn, MyTable.class, "SELECT my_key, string_col FROM my_table ORDER BY 1 LIMIT 1");
-        });
-        assertEquals("ResultSet has 2 columns but MyTable has 4 fields", ex.getMessage());
-    }
-
-    @DisplayName("Wrong entities mismatch")
+    @DisplayName("Wrong entities in select")
     @Test
     void testWrongEntities() {
         Exception ex = assertThrows(SQLException.class, () -> {
@@ -201,13 +195,19 @@ public class TestSuite {
             MyTableWithUnmappedField rs = em.getSingleResult(conn, MyTableWithUnmappedField.class, "SELECT * FROM my_table ORDER BY 1 LIMIT 1");
         });
         log.error(ex.getMessage());
-        assertEquals("No suitable field found in class MyTableWithUnmappedField to map column string_col", ex.getMessage());
+        assertEquals("ResultSet has 4 columns but MyTableWithUnmappedField has 3 fields", ex.getMessage());
 
         ex = assertThrows(SQLException.class, () -> {
-            MyTableWithoutSetter rs = em.getSingleResult(conn, MyTableWithoutSetter.class, "SELECT * FROM my_table ORDER BY 1 LIMIT 1");
+            MyTableWithWrongMapping rs = em.getSingleResult(conn, MyTableWithWrongMapping.class, "SELECT * FROM my_table ORDER BY 1 LIMIT 1");
         });
         log.error(ex.getMessage());
-        assertEquals("No suitable setter method found for field myKey", ex.getMessage());
+        assertEquals("No suitable field found in class MyTableWithWrongMapping to map column int_col", ex.getMessage());
+
+        ex = assertThrows(SQLException.class, () -> {
+            MyTableWithoutAccessors rs = em.getSingleResult(conn, MyTableWithoutAccessors.class, "SELECT * FROM my_table ORDER BY 1 LIMIT 1");
+        });
+        log.error(ex.getMessage());
+        assertEquals("No suitable setter method found for field myKey of class MyTableWithoutAccessors", ex.getMessage());
     }
 
     @DisplayName("Executing arbitrary statements")
@@ -220,7 +220,48 @@ public class TestSuite {
         int value = em.getSingleResult(conn, Integer.class, "SELECT my_key FROM my_table2 LIMIT 1");
         assertEquals(10, value);
         em.execute(conn, "DROP TABLE public.my_table2");
-        conn.commit();
+        conn.rollback();
+    }
+
+    @DisplayName("Inserting entity")
+    @Test
+    void testInsert() throws SQLException {
+        MyTable insert = new MyTable();
+        insert.setMyKey(10L);
+        insert.setStringCol("new value");
+        insert.setIntCol(null);
+        insert.setTimestampCol(new Date());
+        em.insert(conn, insert);
+        MyTable rs = em.getSingleResult(conn, MyTable.class, "SELECT * FROM my_table WHERE my_key = ?", insert.getMyKey());
+        log.info(rs);
+        assertEquals(insert, rs);
+        conn.rollback();
+    }
+
+    @DisplayName("Wrong entities in DML")
+    @Test
+    void testWrongEntitiesInDML() throws SQLException {
+        Exception ex = assertThrows(SQLException.class, () -> em.insert(conn, null));
+        log.error(ex.getMessage());
+        assertEquals("Entity object is null", ex.getMessage());
+
+        ex = assertThrows(SQLException.class, () -> em.insert(conn, new MyTableUnannotated()));
+        log.error(ex.getMessage());
+        assertEquals("Entity class MyTableUnannotated must be @Table annotated", ex.getMessage());
+
+        ex = assertThrows(SQLException.class, () -> em.insert(conn, new MyTableWithoutAccessors()));
+        log.error(ex.getMessage());
+        assertEquals("No suitable getter method found for field intCol of class MyTableWithoutAccessors", ex.getMessage());
+
+        ex = assertThrows(SQLException.class, () -> em.insert(conn, new MyTableWithNoMappedFields()));
+        log.error(ex.getMessage());
+        assertEquals("Entity class MyTableWithNoMappedFields has no @Column annotated fields", ex.getMessage());
+
+        ex = assertThrows(SQLException.class, () -> em.insert(conn, new MyTableInvalidProperty()));
+        log.error(ex.getMessage());
+        assertEquals("Field timestampCol of entity class MyTableInvalidProperty is not a valid property", ex.getMessage());
+
+        conn.rollback();
     }
 
 }

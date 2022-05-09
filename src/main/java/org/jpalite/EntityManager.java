@@ -1,10 +1,15 @@
 package org.jpalite;
 
 import lombok.extern.log4j.Log4j2;
+import org.jpalite.dml.EntityProcessor;
+import org.jpalite.dml.SqlProcessor;
 import org.jpalite.row.RowProcessor;
 import org.jpalite.row.RowProcessorFactory;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,7 +27,7 @@ public class EntityManager {
         List<T> ret = new ArrayList<>();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setFetchSize(fetchSize);
-            fillParameters(stmt, params);
+            new SqlProcessor().fillParameters(stmt, params);
             try (ResultSet rs = stmt.executeQuery()) {
                 RowProcessor<T> rowProcessor = RowProcessorFactory.create(clazz, rs.getMetaData());
                 while (rs.next()) {
@@ -36,7 +41,7 @@ public class EntityManager {
     public <T> T getSingleResult(Connection conn, Class<T> clazz, String sql, Object... params) throws SQLException {
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setFetchSize(2);
-            fillParameters(stmt, params);
+            new SqlProcessor().fillParameters(stmt, params);
             try (ResultSet rs = stmt.executeQuery()) {
                 RowProcessor<T> rowProcessor = RowProcessorFactory.create(clazz, rs.getMetaData());
                 if (rs.next()) {
@@ -54,28 +59,20 @@ public class EntityManager {
 
     public long execute(Connection conn, String sql, Object... params) throws SQLException {
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            fillParameters(stmt, params);
+            new SqlProcessor().fillParameters(stmt, params);
             return stmt.executeLargeUpdate();
         }
     }
 
-    private void fillParameters(PreparedStatement stmt, Object... params) throws SQLException {
-        ParameterMetaData pmd = stmt.getParameterMetaData();
-        int stmtCount = pmd.getParameterCount();
-        int paramsCount = params == null ? 0 : params.length;
-        if (stmtCount != paramsCount) {
-            throw new SQLException(String.format("Query needs %d parameters but %d were provided", stmtCount, paramsCount));
+    public void insert(Connection conn, Object obj) throws SQLException {
+        if (obj == null) {
+            throw new SQLException("Entity object is null");
         }
-        if (params == null) {
-            return;
-        }
-        for (int i = 0; i < params.length; i++) {
-            if (params[i] != null) {
-                stmt.setObject(i + 1, params[i]);
-            } else {
-                int sqlType = pmd.getParameterType(i + 1);
-                stmt.setNull(i + 1, sqlType);
-            }
+        EntityProcessor<?> ep = new EntityProcessor<>(obj.getClass());
+        String sql = ep.generateInsertStatement();
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ep.fillParameters(stmt, obj);
+            stmt.executeUpdate();
         }
     }
 
