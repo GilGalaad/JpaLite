@@ -19,14 +19,14 @@ import java.util.stream.Collectors;
 import static org.jpalite.ReflectionUtils.*;
 
 @Log4j2
-public class EntityProcessor<T> {
+public class BeanProcessor<T> {
 
     private final Class<T> clazz;
     private final List<ColumnMetaData> cmds;
     private final List<ColumnMetaData> idColumns;
     private final List<ColumnMetaData> dataColumns;
 
-    public EntityProcessor(Class<T> clazz) throws SQLException {
+    public BeanProcessor(Class<T> clazz) throws SQLException {
         this.clazz = clazz;
         validateEntity(clazz);
         List<Field> beanFields = getBeanFields(clazz);

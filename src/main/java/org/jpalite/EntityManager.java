@@ -1,7 +1,7 @@
 package org.jpalite;
 
 import lombok.extern.log4j.Log4j2;
-import org.jpalite.dml.EntityProcessor;
+import org.jpalite.dml.BeanProcessor;
 import org.jpalite.dml.SqlProcessor;
 import org.jpalite.row.RowProcessor;
 import org.jpalite.row.RowProcessorFactory;
@@ -65,11 +65,11 @@ public class EntityManager {
         if (obj == null) {
             throw new SQLException("Entity object is null");
         }
-        EntityProcessor<?> ep = new EntityProcessor<>(obj.getClass());
-        String sql = ep.generateInsertStatement();
+        BeanProcessor<?> bp = new BeanProcessor<>(obj.getClass());
+        String sql = bp.generateInsertStatement();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             ParameterMetaData pmd = stmt.getParameterMetaData();
-            ep.fillInsertParameters(stmt, pmd, obj);
+            bp.fillInsertParameters(stmt, pmd, obj);
             stmt.executeUpdate();
         }
     }
@@ -86,12 +86,12 @@ public class EntityManager {
                 throw new SQLException("Entity list must contain objects of the same type");
             }
         }
-        EntityProcessor<?> ep = new EntityProcessor<>(objs.get(0).getClass());
-        String sql = ep.generateInsertStatement();
+        BeanProcessor<?> bp = new BeanProcessor<>(objs.get(0).getClass());
+        String sql = bp.generateInsertStatement();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             ParameterMetaData pmd = stmt.getParameterMetaData();
             for (var obj : objs) {
-                ep.fillInsertParameters(stmt, pmd, obj);
+                bp.fillInsertParameters(stmt, pmd, obj);
                 stmt.addBatch();
             }
             stmt.executeBatch();
@@ -102,11 +102,11 @@ public class EntityManager {
         if (obj == null) {
             throw new SQLException("Entity object is null");
         }
-        EntityProcessor<?> ep = new EntityProcessor<>(obj.getClass());
-        String sql = ep.generateUpdateStatement();
+        BeanProcessor<?> bp = new BeanProcessor<>(obj.getClass());
+        String sql = bp.generateUpdateStatement();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             ParameterMetaData pmd = stmt.getParameterMetaData();
-            ep.fillUpdateParameters(stmt, pmd, obj);
+            bp.fillUpdateParameters(stmt, pmd, obj);
             stmt.executeUpdate();
         }
     }
