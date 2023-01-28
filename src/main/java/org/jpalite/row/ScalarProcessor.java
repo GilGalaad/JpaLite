@@ -1,6 +1,5 @@
 package org.jpalite.row;
 
-import lombok.extern.log4j.Log4j2;
 import org.jpalite.column.ColumnProcessorFactory;
 import org.jpalite.dto.ColumnMetaData;
 
@@ -8,7 +7,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
-@Log4j2
 public class ScalarProcessor<T> implements RowProcessor<T> {
 
     private final Class<T> clazz;

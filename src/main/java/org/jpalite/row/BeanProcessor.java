@@ -1,6 +1,5 @@
 package org.jpalite.row;
 
-import lombok.extern.log4j.Log4j2;
 import org.jpalite.column.ColumnProcessorFactory;
 import org.jpalite.dto.ColumnMetaData;
 
@@ -15,27 +14,26 @@ import java.util.List;
 
 import static org.jpalite.ReflectionUtils.*;
 
-@Log4j2
 public class BeanProcessor<T> implements RowProcessor<T> {
 
     private final Class<T> clazz;
-    private final List<ColumnMetaData> cmds;
+    private final List<ColumnMetaData> columnMetaData;
 
-    public BeanProcessor(Class<T> clazz, ResultSetMetaData rsmd) throws SQLException {
+    public BeanProcessor(Class<T> clazz, ResultSetMetaData resultSetMetaData) throws SQLException {
         this.clazz = clazz;
-        this.cmds = new ArrayList<>(rsmd.getColumnCount());
+        this.columnMetaData = new ArrayList<>(resultSetMetaData.getColumnCount());
 
         List<Field> beanFields = getBeanFields(clazz);
         List<PropertyDescriptor> propertyDescriptors = getPropertyDescriptorsForFields(clazz);
-        if (rsmd.getColumnCount() != beanFields.size()) {
-            throw new SQLException(String.format("ResultSet has %d columns but %s has %d fields", rsmd.getColumnCount(), clazz.getSimpleName(), beanFields.size()));
+        if (resultSetMetaData.getColumnCount() != beanFields.size()) {
+            throw new SQLException(String.format("ResultSet has %d columns but %s has %d fields", resultSetMetaData.getColumnCount(), clazz.getSimpleName(), beanFields.size()));
         }
 
-        for (int i = 0; i < rsmd.getColumnCount(); i++) {
+        for (int i = 0; i < resultSetMetaData.getColumnCount(); i++) {
             ColumnMetaData column = new ColumnMetaData();
             column.setColumnIndex(i + 1);
 
-            String columnName = rsmd.getColumnLabel(i + 1);
+            String columnName = resultSetMetaData.getColumnLabel(i + 1);
             column.setColumnName(columnName);
 
             Field field = getFieldForColumn(beanFields, columnName);
@@ -51,7 +49,7 @@ public class BeanProcessor<T> implements RowProcessor<T> {
                 throw new SQLException(String.format("No suitable setter method found for field %s of class %s", fieldName, clazz.getSimpleName()));
             }
 
-            cmds.add(column);
+            columnMetaData.add(column);
         }
     }
 
@@ -64,7 +62,7 @@ public class BeanProcessor<T> implements RowProcessor<T> {
             throw new SQLException(String.format("No default constructor found in class %s", clazz.getSimpleName()), ex);
         }
 
-        for (var cmd : cmds) {
+        for (var cmd : columnMetaData) {
             Object value = cmd.getColumnProcessor().process(rs, cmd.getColumnIndex());
             if (cmd.isPrimitive() && value == null) {
                 throw new SQLException(String.format("Cannot assign null value to a primitive type for column %s", cmd.getColumnName()));

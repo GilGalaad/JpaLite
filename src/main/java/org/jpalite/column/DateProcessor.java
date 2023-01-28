@@ -1,13 +1,10 @@
 package org.jpalite.column;
 
-import lombok.extern.log4j.Log4j2;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 
-@Log4j2
 public class DateProcessor implements ColumnProcessor<Date> {
 
     @Override

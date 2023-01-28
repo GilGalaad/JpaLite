@@ -1,6 +1,5 @@
 package org.jpalite.dml;
 
-import lombok.extern.log4j.Log4j2;
 import org.jpalite.annotation.Column;
 import org.jpalite.annotation.Id;
 import org.jpalite.annotation.Table;
@@ -18,11 +17,10 @@ import java.util.stream.Collectors;
 
 import static org.jpalite.ReflectionUtils.*;
 
-@Log4j2
 public class BeanProcessor<T> {
 
     private final Class<T> clazz;
-    private final List<ColumnMetaData> cmds;
+    private final List<ColumnMetaData> columnMetaData;
     private final List<ColumnMetaData> idColumns;
     private final List<ColumnMetaData> dataColumns;
 
@@ -31,7 +29,7 @@ public class BeanProcessor<T> {
         validateEntity(clazz);
         List<Field> beanFields = getBeanFields(clazz);
         List<PropertyDescriptor> propertyDescriptors = getPropertyDescriptorsForFields(clazz);
-        this.cmds = new ArrayList<>(beanFields.size());
+        this.columnMetaData = new ArrayList<>(beanFields.size());
 
         for (int i = 0; i < beanFields.size(); i++) {
             ColumnMetaData column = new ColumnMetaData();
@@ -51,10 +49,10 @@ public class BeanProcessor<T> {
                 throw new SQLException(String.format("No suitable getter method found for field %s of class %s", fieldName, clazz.getSimpleName()));
             }
 
-            cmds.add(column);
+            columnMetaData.add(column);
         }
-        idColumns = cmds.stream().filter(ColumnMetaData::isId).collect(Collectors.toList());
-        dataColumns = cmds.stream().filter(i -> !i.isId()).collect(Collectors.toList());
+        idColumns = columnMetaData.stream().filter(ColumnMetaData::isId).toList();
+        dataColumns = columnMetaData.stream().filter(i -> !i.isId()).toList();
     }
 
     private void validateEntity(Class<T> clazz) throws SQLException {
@@ -65,16 +63,16 @@ public class BeanProcessor<T> {
 
     public String generateInsertStatement() {
         return "INSERT INTO " + clazz.getAnnotation(Table.class).name()
-               + " ("
-               + cmds.stream().map(ColumnMetaData::getColumnName).collect(Collectors.joining(", "))
-               + ") VALUES ("
-               + String.join(", ", Collections.nCopies(cmds.size(), "?"))
-               + ")";
+                + " ("
+                + columnMetaData.stream().map(ColumnMetaData::getColumnName).collect(Collectors.joining(", "))
+                + ") VALUES ("
+                + String.join(", ", Collections.nCopies(columnMetaData.size(), "?"))
+                + ")";
     }
 
     public void fillInsertParameters(PreparedStatement stmt, ParameterMetaData pmd, Object obj) throws SQLException {
-        List<Object> params = new ArrayList<>(cmds.size());
-        for (var cmd : cmds) {
+        List<Object> params = new ArrayList<>(columnMetaData.size());
+        for (var cmd : columnMetaData) {
             params.add(invokeWrapper(cmd.getReadMethod(), obj));
         }
         DMLUtils.fillParameters(stmt, pmd, params.toArray());
@@ -88,15 +86,15 @@ public class BeanProcessor<T> {
             throw new SQLException(String.format("Entity class %s has only @Id annotated fields", clazz.getSimpleName()));
         }
         return "UPDATE "
-               + clazz.getAnnotation(Table.class).name()
-               + " SET "
-               + dataColumns.stream().map(i -> i.getColumnName() + " = ?").collect(Collectors.joining(", "))
-               + " WHERE "
-               + idColumns.stream().map(i -> i.getColumnName() + " = ?").collect(Collectors.joining(" AND "));
+                + clazz.getAnnotation(Table.class).name()
+                + " SET "
+                + dataColumns.stream().map(i -> i.getColumnName() + " = ?").collect(Collectors.joining(", "))
+                + " WHERE "
+                + idColumns.stream().map(i -> i.getColumnName() + " = ?").collect(Collectors.joining(" AND "));
     }
 
     public void fillUpdateParameters(PreparedStatement stmt, ParameterMetaData pmd, Object obj) throws SQLException {
-        List<Object> params = new ArrayList<>(cmds.size());
+        List<Object> params = new ArrayList<>(columnMetaData.size());
         for (var cmd : dataColumns) {
             params.add(invokeWrapper(cmd.getReadMethod(), obj));
         }

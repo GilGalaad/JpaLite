@@ -1,6 +1,5 @@
 package org.jpalite;
 
-import lombok.extern.log4j.Log4j2;
 import org.jpalite.annotation.Column;
 
 import java.beans.BeanInfo;
@@ -15,7 +14,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Log4j2
 public class ReflectionUtils {
 
     private ReflectionUtils() {

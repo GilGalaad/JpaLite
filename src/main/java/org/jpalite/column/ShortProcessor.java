@@ -1,11 +1,8 @@
 package org.jpalite.column;
 
-import lombok.extern.log4j.Log4j2;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-@Log4j2
 public class ShortProcessor implements ColumnProcessor<Short> {
 
     @Override

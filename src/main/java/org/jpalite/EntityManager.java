@@ -1,6 +1,5 @@
 package org.jpalite;
 
-import lombok.extern.log4j.Log4j2;
 import org.jpalite.dml.BeanProcessor;
 import org.jpalite.dml.SqlProcessor;
 import org.jpalite.row.RowProcessor;
@@ -11,10 +10,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@Log4j2
 public class EntityManager {
 
-    private static final int DEFAULT_FETCH_SIZE = 10_000;
+    private static final int DEFAULT_FETCH_SIZE = 1_000;
 
     public <T> List<T> getResultList(Connection conn, Class<T> clazz, String sql, Object... params) throws SQLException {
         return getResultList(conn, DEFAULT_FETCH_SIZE, clazz, sql, params);

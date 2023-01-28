@@ -1,6 +1,5 @@
 package org.jpalite.row;
 
-import lombok.extern.log4j.Log4j2;
 import org.jpalite.column.ColumnProcessorFactory;
 import org.jpalite.dto.ColumnMetaData;
 
@@ -11,7 +10,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Log4j2
 public class ArrayProcessor<T> implements RowProcessor<T> {
 
     private final Class<?> componentClass;
