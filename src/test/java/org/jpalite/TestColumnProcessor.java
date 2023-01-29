@@ -18,16 +18,16 @@ public class TestColumnProcessor extends TestSession {
     void testFetchStringAsScalar() throws SQLException {
         log.info("Fetching string as scalar");
         String expected = "test_value";
-        execute("CREATE TABLE IF NOT EXISTS test_table (string_col TEXT)");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 TEXT)");
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?)")) {
             stmt.setString(1, expected);
             stmt.executeUpdate();
         }
         conn.commit();
-        String actual = em.getSingleResult(conn, String.class, "SELECT string_col FROM test_table LIMIT 1");
+        String actual = em.getSingleResult(conn, String.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertEquals(expected, actual);
-        execute("UPDATE test_table SET string_col = NULL");
-        actual = em.getSingleResult(conn, String.class, "SELECT string_col FROM test_table LIMIT 1");
+        execute("UPDATE test_table SET col1 = NULL");
+        actual = em.getSingleResult(conn, String.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertNull(actual);
     }
 
@@ -36,16 +36,16 @@ public class TestColumnProcessor extends TestSession {
     void testFetchShortAsScalar() throws SQLException {
         log.info("Fetching short as scalar");
         Short expected = 1;
-        execute("CREATE TABLE IF NOT EXISTS test_table (short_col SMALLINT)");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 SMALLINT)");
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?)")) {
             stmt.setShort(1, expected);
             stmt.executeUpdate();
         }
         conn.commit();
-        Short actual = em.getSingleResult(conn, Short.class, "SELECT short_col FROM test_table LIMIT 1");
+        Short actual = em.getSingleResult(conn, Short.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertEquals(expected, actual);
-        execute("UPDATE test_table SET short_col = NULL");
-        actual = em.getSingleResult(conn, Short.class, "SELECT short_col FROM test_table LIMIT 1");
+        execute("UPDATE test_table SET col1 = NULL");
+        actual = em.getSingleResult(conn, Short.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertNull(actual);
     }
 
@@ -54,13 +54,13 @@ public class TestColumnProcessor extends TestSession {
     void testFetchShortAsPrimitiveScalar() throws SQLException {
         log.info("Fetching short as primitive scalar");
         short expected = 1;
-        execute("CREATE TABLE IF NOT EXISTS test_table (short_col SMALLINT)");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 SMALLINT)");
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?)")) {
             stmt.setShort(1, expected);
             stmt.executeUpdate();
         }
         conn.commit();
-        short actual = em.getSingleResult(conn, short.class, "SELECT short_col FROM test_table LIMIT 1");
+        short actual = em.getSingleResult(conn, short.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertEquals(expected, actual);
     }
 
@@ -69,16 +69,16 @@ public class TestColumnProcessor extends TestSession {
     void testFetchIntegerAsScalar() throws SQLException {
         log.info("Fetching integer as scalar");
         Integer expected = 1;
-        execute("CREATE TABLE IF NOT EXISTS test_table (integer_col INTEGER)");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 INTEGER)");
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?)")) {
             stmt.setInt(1, expected);
             stmt.executeUpdate();
         }
         conn.commit();
-        Integer actual = em.getSingleResult(conn, Integer.class, "SELECT integer_col FROM test_table LIMIT 1");
+        Integer actual = em.getSingleResult(conn, Integer.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertEquals(expected, actual);
-        execute("UPDATE test_table SET integer_col = NULL");
-        actual = em.getSingleResult(conn, Integer.class, "SELECT integer_col FROM test_table LIMIT 1");
+        execute("UPDATE test_table SET col1 = NULL");
+        actual = em.getSingleResult(conn, Integer.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertNull(actual);
     }
 
@@ -87,13 +87,13 @@ public class TestColumnProcessor extends TestSession {
     void testFetchIntegerAsPrimitiveScalar() throws SQLException {
         log.info("Fetching integer column as primitive scalar");
         int expected = 1;
-        execute("CREATE TABLE IF NOT EXISTS test_table (integer_col INTEGER)");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 INTEGER)");
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?)")) {
             stmt.setInt(1, expected);
             stmt.executeUpdate();
         }
         conn.commit();
-        int actual = em.getSingleResult(conn, int.class, "SELECT integer_col FROM test_table LIMIT 1");
+        int actual = em.getSingleResult(conn, int.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertEquals(expected, actual);
     }
 
@@ -102,16 +102,16 @@ public class TestColumnProcessor extends TestSession {
     void testFetchLongAsScalar() throws SQLException {
         log.info("Fetching long as scalar");
         Long expected = 1L;
-        execute("CREATE TABLE IF NOT EXISTS test_table (long_col BIGINT)");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 BIGINT)");
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?)")) {
             stmt.setLong(1, expected);
             stmt.executeUpdate();
         }
         conn.commit();
-        Long actual = em.getSingleResult(conn, Long.class, "SELECT long_col FROM test_table LIMIT 1");
+        Long actual = em.getSingleResult(conn, Long.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertEquals(expected, actual);
-        execute("UPDATE test_table SET long_col = NULL");
-        actual = em.getSingleResult(conn, Long.class, "SELECT long_col FROM test_table LIMIT 1");
+        execute("UPDATE test_table SET col1 = NULL");
+        actual = em.getSingleResult(conn, Long.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertNull(actual);
     }
 
@@ -120,13 +120,13 @@ public class TestColumnProcessor extends TestSession {
     void testFetchLongAsPrimitiveScalar() throws SQLException {
         log.info("Fetching long as primitive scalar");
         long expected = 1L;
-        execute("CREATE TABLE IF NOT EXISTS test_table (long_col BIGINT)");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 BIGINT)");
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?)")) {
             stmt.setLong(1, expected);
             stmt.executeUpdate();
         }
         conn.commit();
-        long actual = em.getSingleResult(conn, long.class, "SELECT long_col FROM test_table LIMIT 1");
+        long actual = em.getSingleResult(conn, long.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertEquals(expected, actual);
     }
 
@@ -135,16 +135,16 @@ public class TestColumnProcessor extends TestSession {
     void testFetchFloatAsScalar() throws SQLException {
         log.info("Fetching float as scalar");
         Float expected = 3.14F;
-        execute("CREATE TABLE IF NOT EXISTS test_table (float_col DECIMAL)");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 DECIMAL)");
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?)")) {
             stmt.setFloat(1, expected);
             stmt.executeUpdate();
         }
         conn.commit();
-        Float actual = em.getSingleResult(conn, Float.class, "SELECT float_col FROM test_table LIMIT 1");
+        Float actual = em.getSingleResult(conn, Float.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertEquals(expected, actual);
-        execute("UPDATE test_table SET float_col = NULL");
-        actual = em.getSingleResult(conn, Float.class, "SELECT float_col FROM test_table LIMIT 1");
+        execute("UPDATE test_table SET col1 = NULL");
+        actual = em.getSingleResult(conn, Float.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertNull(actual);
     }
 
@@ -153,13 +153,13 @@ public class TestColumnProcessor extends TestSession {
     void testFetchFloatAsPrimitiveScalar() throws SQLException {
         log.info("Fetching float as primitive scalar");
         float expected = 3.14F;
-        execute("CREATE TABLE IF NOT EXISTS test_table (float_col DECIMAL)");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 DECIMAL)");
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?)")) {
             stmt.setFloat(1, expected);
             stmt.executeUpdate();
         }
         conn.commit();
-        float actual = em.getSingleResult(conn, float.class, "SELECT float_col FROM test_table LIMIT 1");
+        float actual = em.getSingleResult(conn, float.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertEquals(expected, actual);
     }
 
@@ -168,16 +168,16 @@ public class TestColumnProcessor extends TestSession {
     void testFetchDoubleAsScalar() throws SQLException {
         log.info("Fetching double as scalar");
         Double expected = 3.14D;
-        execute("CREATE TABLE IF NOT EXISTS test_table (double_col DECIMAL)");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 DECIMAL)");
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?)")) {
             stmt.setDouble(1, expected);
             stmt.executeUpdate();
         }
         conn.commit();
-        Double actual = em.getSingleResult(conn, Double.class, "SELECT double_col FROM test_table LIMIT 1");
+        Double actual = em.getSingleResult(conn, Double.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertEquals(expected, actual);
-        execute("UPDATE test_table SET double_col = NULL");
-        actual = em.getSingleResult(conn, Double.class, "SELECT double_col FROM test_table LIMIT 1");
+        execute("UPDATE test_table SET col1 = NULL");
+        actual = em.getSingleResult(conn, Double.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertNull(actual);
     }
 
@@ -186,13 +186,13 @@ public class TestColumnProcessor extends TestSession {
     void testFetchDoubleAsPrimitiveScalar() throws SQLException {
         log.info("Fetching double as primitive scalar");
         double expected = 3.14D;
-        execute("CREATE TABLE IF NOT EXISTS test_table (double_col DECIMAL)");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 DECIMAL)");
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?)")) {
             stmt.setDouble(1, expected);
             stmt.executeUpdate();
         }
         conn.commit();
-        double actual = em.getSingleResult(conn, double.class, "SELECT double_col FROM test_table LIMIT 1");
+        double actual = em.getSingleResult(conn, double.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertEquals(expected, actual);
     }
 
@@ -201,16 +201,16 @@ public class TestColumnProcessor extends TestSession {
     void testFetchBigDecimalAsScalar() throws SQLException {
         log.info("Fetching big decimal as scalar");
         BigDecimal expected = BigDecimal.valueOf(3.14D);
-        execute("CREATE TABLE IF NOT EXISTS test_table (bigdecimal_col DECIMAL)");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 DECIMAL)");
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?)")) {
             stmt.setBigDecimal(1, expected);
             stmt.executeUpdate();
         }
         conn.commit();
-        BigDecimal actual = em.getSingleResult(conn, BigDecimal.class, "SELECT bigdecimal_col FROM test_table LIMIT 1");
+        BigDecimal actual = em.getSingleResult(conn, BigDecimal.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertEquals(expected, actual);
-        execute("UPDATE test_table SET bigdecimal_col = NULL");
-        actual = em.getSingleResult(conn, BigDecimal.class, "SELECT bigdecimal_col FROM test_table LIMIT 1");
+        execute("UPDATE test_table SET col1 = NULL");
+        actual = em.getSingleResult(conn, BigDecimal.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertNull(actual);
     }
 
@@ -219,16 +219,16 @@ public class TestColumnProcessor extends TestSession {
     void testFetchDateAsScalar() throws SQLException {
         log.info("Fetching date as scalar");
         Date expected = new Date();
-        execute("CREATE TABLE IF NOT EXISTS test_table (date_col TIMESTAMP(3))");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 TIMESTAMP(3))");
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?)")) {
             stmt.setTimestamp(1, new java.sql.Timestamp(expected.getTime()));
             stmt.executeUpdate();
         }
         conn.commit();
-        Date actual = em.getSingleResult(conn, Date.class, "SELECT date_col FROM test_table LIMIT 1");
+        Date actual = em.getSingleResult(conn, Date.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertEquals(expected, actual);
-        execute("UPDATE test_table SET date_col = NULL");
-        actual = em.getSingleResult(conn, Date.class, "SELECT date_col FROM test_table LIMIT 1");
+        execute("UPDATE test_table SET col1 = NULL");
+        actual = em.getSingleResult(conn, Date.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertNull(actual);
     }
 
@@ -237,17 +237,17 @@ public class TestColumnProcessor extends TestSession {
     void testFetchObjectAsScalar() throws SQLException {
         log.info("Fetching generic object as scalar");
         Object expected = "test_value";
-        execute("CREATE TABLE IF NOT EXISTS test_table (string_col TEXT)");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 TEXT)");
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?)")) {
             stmt.setObject(1, expected);
             stmt.executeUpdate();
         }
         conn.commit();
-        Object actual = em.getSingleResult(conn, Object.class, "SELECT string_col FROM test_table LIMIT 1");
+        Object actual = em.getSingleResult(conn, Object.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertEquals(expected.getClass().getName(), actual.getClass().getName());
         Assertions.assertEquals(expected, actual);
-        execute("UPDATE test_table SET string_col = NULL");
-        actual = em.getSingleResult(conn, Object.class, "SELECT string_col FROM test_table LIMIT 1");
+        execute("UPDATE test_table SET col1 = NULL");
+        actual = em.getSingleResult(conn, Object.class, "SELECT col1 FROM test_table LIMIT 1");
         Assertions.assertNull(actual);
     }
 

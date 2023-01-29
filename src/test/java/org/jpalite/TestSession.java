@@ -24,6 +24,7 @@ public abstract class TestSession {
         String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", "localhost", 5432, "postgres");
         Properties jdbcProps = new Properties();
         jdbcProps.setProperty("user", "postgres");
+        jdbcProps.setProperty("prepareThreshold", "0");
         conn = DriverManager.getConnection(jdbcUrl, jdbcProps);
         conn.setAutoCommit(false);
         dropSchema();
