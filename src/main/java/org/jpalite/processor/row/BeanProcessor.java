@@ -32,7 +32,7 @@ public class BeanProcessor<T> implements RowProcessor<T> {
         this.clazz = clazz;
 
         if (resultSetMetaData == null && !clazz.isAnnotationPresent(Table.class)) {
-            throw new SQLException(String.format("Entity class %s must be @Table annotated", clazz.getSimpleName()));
+            throw new SQLException(String.format("Bean class %s must be @Table annotated", clazz.getSimpleName()));
         }
 
         // Field is used to get annotations via reflection
@@ -127,10 +127,10 @@ public class BeanProcessor<T> implements RowProcessor<T> {
 
     public String generateUpdateStatement() throws SQLException {
         if (idColumnsMappings.isEmpty()) {
-            throw new SQLException(String.format("Entity class %s has no @Id annotated fields", clazz.getSimpleName()));
+            throw new SQLException(String.format("Bean class %s has no @Id annotated fields", clazz.getSimpleName()));
         }
         if (dataColumnsMappings.isEmpty()) {
-            throw new SQLException(String.format("Entity class %s has only @Id annotated fields", clazz.getSimpleName()));
+            throw new SQLException(String.format("Bean class %s has only @Id annotated fields", clazz.getSimpleName()));
         }
         return "UPDATE "
                 + clazz.getAnnotation(Table.class).name()
@@ -155,7 +155,7 @@ public class BeanProcessor<T> implements RowProcessor<T> {
     private List<Field> getBeanFields(Class<T> clazz) throws SQLException {
         List<Field> ret = Arrays.stream(clazz.getDeclaredFields()).filter(f -> f.isAnnotationPresent(Column.class)).collect(Collectors.toList());
         if (ret.isEmpty()) {
-            throw new SQLException(String.format("Entity class %s has no @Column annotated fields", clazz.getSimpleName()));
+            throw new SQLException(String.format("Bean class %s has no @Column annotated fields", clazz.getSimpleName()));
         }
         return ret;
     }

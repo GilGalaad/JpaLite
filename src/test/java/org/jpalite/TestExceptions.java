@@ -48,7 +48,7 @@ public class TestExceptions extends TestSession {
     @DisplayName("Fetching null value as primitive array")
     @Test
     void testFetchNullValueAsPrimitiveArray() throws SQLException {
-        log.info("Fetching null value as primitive scalar");
+        log.info("Fetching null value as primitive array");
         execute("CREATE TABLE IF NOT EXISTS test_table (col1 INTEGER, col2 INTEGER)");
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?,?)")) {
             stmt.setObject(1, 1);
@@ -63,7 +63,7 @@ public class TestExceptions extends TestSession {
     @DisplayName("Fetching null value as primitive in bean")
     @Test
     void testFetchNullValueAsPrimitiveInBean() throws SQLException {
-        log.info("Fetching null value as primitive scalar");
+        log.info("Fetching null value as primitive in bean");
         execute("CREATE TABLE IF NOT EXISTS test_table (col1 INTEGER, col2 INTEGER)");
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?,?)")) {
             stmt.setObject(1, 1);
@@ -149,7 +149,7 @@ public class TestExceptions extends TestSession {
     @DisplayName("Inserting null bean list")
     @Test
     void testInsertNullBeanList() throws SQLException {
-        log.info("Inserting null bean");
+        log.info("Inserting null bean list");
         Exception ex = Assertions.assertThrows(SQLException.class, () -> em.batchInsert(conn, null));
         Assertions.assertEquals("Bean list is empty", ex.getMessage());
     }

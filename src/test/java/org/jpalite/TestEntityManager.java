@@ -95,8 +95,8 @@ public class TestEntityManager extends TestSession {
 
         List<TestBean> beans = new ArrayList<>(batchSize);
         for (int i = 0; i < batchSize; i++) {
-            TestBean entity = new TestBean(i + 1, "JpaLite");
-            beans.add(entity);
+            TestBean bean = new TestBean(i + 1, "JpaLite");
+            beans.add(bean);
         }
         startTime = System.nanoTime();
         em.batchInsert(conn, beans);
