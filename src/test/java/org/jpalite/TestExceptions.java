@@ -141,7 +141,7 @@ public class TestExceptions extends TestSession {
 
     @DisplayName("Inserting null bean")
     @Test
-    void testInsertNullBean() throws SQLException {
+    void testInsertNullBean() {
         log.info("Inserting null bean");
         Exception ex = Assertions.assertThrows(SQLException.class, () -> em.insert(conn, null));
         Assertions.assertEquals("Bean object is null", ex.getMessage());
@@ -149,7 +149,7 @@ public class TestExceptions extends TestSession {
 
     @DisplayName("Inserting null bean list")
     @Test
-    void testInsertNullBeanList() throws SQLException {
+    void testInsertNullBeanList() {
         log.info("Inserting null bean list");
         Exception ex = Assertions.assertThrows(SQLException.class, () -> em.batchInsert(conn, null));
         Assertions.assertEquals("Bean list is empty", ex.getMessage());
@@ -157,7 +157,7 @@ public class TestExceptions extends TestSession {
 
     @DisplayName("Inserting bean list with nulls")
     @Test
-    void testInsertBeanListWithNulls() throws SQLException {
+    void testInsertBeanListWithNulls() {
         log.info("Inserting bean list with nulls");
         List<TestBean> beans = Arrays.asList(new TestBean(), null);
         Exception ex = Assertions.assertThrows(SQLException.class, () -> em.batchInsert(conn, beans));
@@ -166,7 +166,7 @@ public class TestExceptions extends TestSession {
 
     @DisplayName("Inserting bean list with different types")
     @Test
-    void testInsertBeanListWithDifferentTypes() throws SQLException {
+    void testInsertBeanListWithDifferentTypes() {
         log.info("Inserting bean list with different types");
         List<Object> beans = Arrays.asList(new TestBean(), new TestBeanPrimitives());
         Exception ex = Assertions.assertThrows(SQLException.class, () -> em.batchInsert(conn, beans));
@@ -175,7 +175,7 @@ public class TestExceptions extends TestSession {
 
     @DisplayName("Updating null bean")
     @Test
-    void testUpdateNullBean() throws SQLException {
+    void testUpdateNullBean() {
         log.info("Updating null bean");
         Exception ex = Assertions.assertThrows(SQLException.class, () -> em.update(conn, null));
         Assertions.assertEquals("Bean object is null", ex.getMessage());
@@ -192,7 +192,7 @@ public class TestExceptions extends TestSession {
 
     @DisplayName("Inserting bean with no @Table annotation")
     @Test
-    void testInsertBeanNoTableAnnotation() throws SQLException {
+    void testInsertBeanNoTableAnnotation() {
         log.info("Inserting bean with no @Table annotation");
         Exception ex = Assertions.assertThrows(SQLException.class, () -> em.insert(conn, new TestBeanNoTableAnnotation()));
         Assertions.assertEquals("Bean class TestBeanNoTableAnnotation must be @Table annotated", ex.getMessage());
@@ -200,7 +200,7 @@ public class TestExceptions extends TestSession {
 
     @DisplayName("Updating bean with no @Id annotation")
     @Test
-    void testUpdateBeanNoIdAnnotation() throws SQLException {
+    void testUpdateBeanNoIdAnnotation() {
         log.info("Updating bean with no @Id annotation");
         Exception ex = Assertions.assertThrows(SQLException.class, () -> em.update(conn, new TestBeanNoIdAnnotation()));
         Assertions.assertEquals("Bean class TestBeanNoIdAnnotation has no @Id annotated fields", ex.getMessage());
@@ -208,7 +208,7 @@ public class TestExceptions extends TestSession {
 
     @DisplayName("Updating bean with all @Id annotations")
     @Test
-    void testUpdateBeanAllIdAnnotations() throws SQLException {
+    void testUpdateBeanAllIdAnnotations() {
         log.info("Updating bean with all @Id annotations");
         Exception ex = Assertions.assertThrows(SQLException.class, () -> em.update(conn, new TestBeanAllIdAnnotation()));
         Assertions.assertEquals("Bean class TestBeanAllIdAnnotation has only @Id annotated fields", ex.getMessage());
@@ -216,7 +216,7 @@ public class TestExceptions extends TestSession {
 
     @DisplayName("Inserting bean with no @Column annotation")
     @Test
-    void testInsertBeanNoColumnAnnotation() throws SQLException {
+    void testInsertBeanNoColumnAnnotation() {
         log.info("Inserting bean with no @Table annotation");
         Exception ex = Assertions.assertThrows(SQLException.class, () -> em.insert(conn, new TestBeanNoColumnAnnotation()));
         Assertions.assertEquals("Bean class TestBeanNoColumnAnnotation has no @Column annotated fields", ex.getMessage());
