@@ -82,29 +82,31 @@ public class TestEntityManager extends TestSession {
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?,?)")) {
             for (int i = 0; i < batchSize; i++) {
                 stmt.setInt(1, i + 1);
-                stmt.setString(2, "JDBC");
+                stmt.setString(2, "test");
                 stmt.addBatch();
             }
             stmt.executeBatch();
         }
+        conn.commit();
         endTime = System.nanoTime();
-        count = em.getSingleResult(conn, int.class, "SELECT COUNT(*) FROM test_table WHERE col2 = ?", "JDBC");
+        count = em.getSingleResult(conn, int.class, "SELECT COUNT(*) FROM test_table");
         Assertions.assertEquals(batchSize, count);
         log.info("Inserted {} rows with JDBC: {} ms", count, (endTime - startTime) / 1_000_000);
-        conn.rollback();
 
+        execute("DROP TABLE IF EXISTS test_table");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 INTEGER, col2 TEXT)");
         List<TestBean> beans = new ArrayList<>(batchSize);
         for (int i = 0; i < batchSize; i++) {
-            TestBean bean = new TestBean(i + 1, "JpaLite");
+            TestBean bean = new TestBean(i + 1, "test");
             beans.add(bean);
         }
         startTime = System.nanoTime();
         em.batchInsert(conn, beans);
+        conn.commit();
         endTime = System.nanoTime();
-        count = em.getSingleResult(conn, Integer.class, "SELECT COUNT(*) FROM test_table WHERE col2 = ?", "JpaLite");
+        count = em.getSingleResult(conn, Integer.class, "SELECT COUNT(*) FROM test_table");
         Assertions.assertEquals(batchSize, count);
         log.info("Inserted {} rows with JpaLite: {} ms", count, (endTime - startTime) / 1_000_000);
-        conn.rollback();
     }
 
     @Data
