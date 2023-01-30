@@ -1,4 +1,4 @@
-package org.jpalite.column;
+package org.jpalite.processor.column;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;

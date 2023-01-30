@@ -1,4 +1,4 @@
-package org.jpalite.row;
+package org.jpalite.processor.row;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

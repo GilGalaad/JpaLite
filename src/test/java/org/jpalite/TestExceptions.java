@@ -3,12 +3,15 @@ package org.jpalite;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jpalite.annotation.Column;
+import org.jpalite.annotation.Table;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 public class TestExceptions extends TestSession {
@@ -84,7 +87,7 @@ public class TestExceptions extends TestSession {
         }
         conn.commit();
         Exception ex = Assertions.assertThrows(SQLException.class, () -> em.getSingleResult(conn, TestBeanWrongColumnNumber.class, "SELECT * FROM test_table LIMIT 1"));
-        Assertions.assertEquals("ResultSet has 2 columns but TestBeanWrongColumnNumber has 1 fields", ex.getMessage());
+        Assertions.assertEquals("ResultSet has 2 columns but class TestBeanWrongColumnNumber has 1 fields", ex.getMessage());
     }
 
     @DisplayName("Fetching bean with no setter")
@@ -99,7 +102,7 @@ public class TestExceptions extends TestSession {
         }
         conn.commit();
         Exception ex = Assertions.assertThrows(SQLException.class, () -> em.getSingleResult(conn, TestBeanNoSetter.class, "SELECT * FROM test_table LIMIT 1"));
-        Assertions.assertEquals("No suitable setter method found for field col2 of class TestBeanNoSetter", ex.getMessage());
+        Assertions.assertEquals("No suitable accessor methods found for field col2 of class TestBeanNoSetter", ex.getMessage());
     }
 
     @DisplayName("Fetching bean with no default constructor")
@@ -115,6 +118,79 @@ public class TestExceptions extends TestSession {
         conn.commit();
         Exception ex = Assertions.assertThrows(SQLException.class, () -> em.getSingleResult(conn, TestBeanNoDefaultConstructor.class, "SELECT * FROM test_table LIMIT 1"));
         Assertions.assertEquals("No default constructor found in class TestBeanNoDefaultConstructor", ex.getMessage());
+    }
+
+    @DisplayName("Fetching too many rows")
+    @Test
+    void testFetchTooManyRows() throws SQLException {
+        log.info("Fetching too many rows");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 TEXT, col2 TEXT)");
+        try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?,?)")) {
+            stmt.setString(1, "test_value1");
+            stmt.setString(2, "test_value2");
+            stmt.executeUpdate();
+            stmt.setString(1, "test_value3");
+            stmt.setString(2, "test_value4");
+            stmt.executeUpdate();
+        }
+        conn.commit();
+        Exception ex = Assertions.assertThrows(SQLException.class, () -> em.getSingleResult(conn, TestBean.class, "SELECT * FROM test_table"));
+        Assertions.assertEquals("Query returned more than 1 row", ex.getMessage());
+    }
+
+    @DisplayName("Inserting null bean")
+    @Test
+    void testInsertNullBean() throws SQLException {
+        log.info("Inserting null bean");
+        Exception ex = Assertions.assertThrows(SQLException.class, () -> em.insert(conn, null));
+        Assertions.assertEquals("Bean object is null", ex.getMessage());
+    }
+
+    @DisplayName("Inserting null bean list")
+    @Test
+    void testInsertNullBeanList() throws SQLException {
+        log.info("Inserting null bean");
+        Exception ex = Assertions.assertThrows(SQLException.class, () -> em.batchInsert(conn, null));
+        Assertions.assertEquals("Bean list is empty", ex.getMessage());
+    }
+
+    @DisplayName("Inserting bean list with nulls")
+    @Test
+    void testInsertBeanListWithNulls() throws SQLException {
+        log.info("Inserting bean list with nulls");
+        List<TestBean> beans = Arrays.asList(new TestBean(), null);
+        Exception ex = Assertions.assertThrows(SQLException.class, () -> em.batchInsert(conn, beans));
+        Assertions.assertEquals("Bean list contains null objects", ex.getMessage());
+    }
+
+    @DisplayName("Inserting bean list with different types")
+    @Test
+    void testInsertBeanListWithDifferentTypes() throws SQLException {
+        log.info("Inserting bean list with different types");
+        List<Object> beans = Arrays.asList(new TestBean(), new TestBeanPrimitives());
+        Exception ex = Assertions.assertThrows(SQLException.class, () -> em.batchInsert(conn, beans));
+        Assertions.assertEquals("Bean list must contain objects of the same type", ex.getMessage());
+    }
+
+    @DisplayName("Updating null bean")
+    @Test
+    void testUpdateNullBean() throws SQLException {
+        log.info("Updating null bean");
+        Exception ex = Assertions.assertThrows(SQLException.class, () -> em.update(conn, null));
+        Assertions.assertEquals("Bean object is null", ex.getMessage());
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Table(name = "test_table")
+    public static class TestBean {
+
+        @Column(name = "col1")
+        private String col1;
+        @Column(name = "col2")
+        private String col2;
+
     }
 
     @Data

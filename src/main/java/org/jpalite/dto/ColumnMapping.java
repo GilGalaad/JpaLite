@@ -1,15 +1,15 @@
 package org.jpalite.dto;
 
 import lombok.Data;
-import org.jpalite.column.ColumnProcessor;
+import org.jpalite.processor.column.ColumnProcessor;
 
 import java.lang.reflect.Method;
 
 @Data
-public class ColumnMetaData {
+public class ColumnMapping {
 
     private int columnIndex;
-    private String columnName;
+    private String columnLabel;
     private String fieldName;
     private boolean isPrimitive;
     private boolean isId;
