@@ -44,7 +44,7 @@ public class BeanProcessor<T> implements RowProcessor<T> {
         if (resultSetMetaData != null) {
             this.columnMappings = new ArrayList<>(resultSetMetaData.getColumnCount());
 
-            if (resultSetMetaData.getColumnCount() > beanFields.size()) {
+            if (resultSetMetaData.getColumnCount() != beanFields.size()) {
                 throw new SQLException(String.format("ResultSet has %d columns but class %s has %d fields", resultSetMetaData.getColumnCount(), clazz.getSimpleName(), beanFields.size()));
             }
 

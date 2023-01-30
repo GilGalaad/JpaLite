@@ -3,6 +3,7 @@ package org.jpalite;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.jpalite.annotation.Column;
+import org.jpalite.annotation.Id;
 import org.jpalite.annotation.Table;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -180,12 +181,69 @@ public class TestExceptions extends TestSession {
         Assertions.assertEquals("Bean object is null", ex.getMessage());
     }
 
+    @DisplayName("Executing raw sql with wrong parameter number")
+    @Test
+    void testExecuteWrongParamsNumber() throws SQLException {
+        log.info("Executing raw sql with wrong parameter number");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 INTEGER, col2 TEXT)");
+        Exception ex = Assertions.assertThrows(SQLException.class, () -> em.execute(conn, "UPDATE test_table SET col2 = ? WHERE col1 = ?", "test_param"));
+        Assertions.assertEquals("Query needs 2 parameters but 1 were provided", ex.getMessage());
+    }
+
+    @DisplayName("Inserting bean with no @Table annotation")
+    @Test
+    void testInsertBeanNoTableAnnotation() throws SQLException {
+        log.info("Inserting bean with no @Table annotation");
+        Exception ex = Assertions.assertThrows(SQLException.class, () -> em.insert(conn, new TestBeanNoTableAnnotation()));
+        Assertions.assertEquals("Bean class TestBeanNoTableAnnotation must be @Table annotated", ex.getMessage());
+    }
+
+    @DisplayName("Updating bean with no @Id annotation")
+    @Test
+    void testUpdateBeanNoIdAnnotation() throws SQLException {
+        log.info("Updating bean with no @Id annotation");
+        Exception ex = Assertions.assertThrows(SQLException.class, () -> em.update(conn, new TestBeanNoIdAnnotation()));
+        Assertions.assertEquals("Bean class TestBeanNoIdAnnotation has no @Id annotated fields", ex.getMessage());
+    }
+
+    @DisplayName("Updating bean with all @Id annotations")
+    @Test
+    void testUpdateBeanAllIdAnnotations() throws SQLException {
+        log.info("Updating bean with all @Id annotations");
+        Exception ex = Assertions.assertThrows(SQLException.class, () -> em.update(conn, new TestBeanAllIdAnnotation()));
+        Assertions.assertEquals("Bean class TestBeanAllIdAnnotation has only @Id annotated fields", ex.getMessage());
+    }
+
+    @DisplayName("Inserting bean with no @Column annotation")
+    @Test
+    void testInsertBeanNoColumnAnnotation() throws SQLException {
+        log.info("Inserting bean with no @Table annotation");
+        Exception ex = Assertions.assertThrows(SQLException.class, () -> em.insert(conn, new TestBeanNoColumnAnnotation()));
+        Assertions.assertEquals("Bean class TestBeanNoColumnAnnotation has no @Column annotated fields", ex.getMessage());
+    }
+
+    @DisplayName("Fetching bean with wrong column name")
+    @Test
+    void testFetchTestBeanWrongColumnName() throws SQLException {
+        log.info("Fetching bean with wrong column name");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 TEXT, col2 TEXT)");
+        try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?,?)")) {
+            stmt.setString(1, "test_value1");
+            stmt.setString(2, "test_value2");
+            stmt.executeUpdate();
+        }
+        conn.commit();
+        Exception ex = Assertions.assertThrows(SQLException.class, () -> em.getSingleResult(conn, TestBeanWrongColumnName.class, "SELECT * FROM test_table LIMIT 1"));
+        Assertions.assertEquals("No suitable field found in class TestBeanWrongColumnName to map column col2", ex.getMessage());
+    }
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     @Table(name = "test_table")
     public static class TestBean {
 
+        @Id
         @Column(name = "col1")
         private String col1;
         @Column(name = "col2")
@@ -237,6 +295,69 @@ public class TestExceptions extends TestSession {
         private String col1;
         @Column(name = "col2")
         private Integer col2;
+
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TestBeanNoTableAnnotation {
+
+        @Column(name = "col1")
+        private String col1;
+        @Column(name = "col2")
+        private String col2;
+
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Table(name = "test_table")
+    public static class TestBeanNoIdAnnotation {
+
+        @Column(name = "col1")
+        private String col1;
+        @Column(name = "col2")
+        private String col2;
+
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Table(name = "test_table")
+    public static class TestBeanAllIdAnnotation {
+
+        @Id
+        @Column(name = "col1")
+        private String col1;
+        @Id
+        @Column(name = "col2")
+        private String col2;
+
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Table(name = "test_table")
+    public static class TestBeanNoColumnAnnotation {
+
+        private String col1;
+        private String col2;
+
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TestBeanWrongColumnName {
+
+        @Column(name = "col1")
+        private String col1;
+        @Column(name = "col3")
+        private String col3;
 
     }
 
