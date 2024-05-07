@@ -1,5 +1,6 @@
 package org.jpalite;
 
+import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -12,7 +13,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-@Slf4j
+@Log4j2
 public abstract class TestSession {
 
     protected static Connection conn;
@@ -24,6 +25,7 @@ public abstract class TestSession {
         String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", "localhost", 5432, "postgres");
         Properties jdbcProps = new Properties();
         jdbcProps.setProperty("user", "postgres");
+        jdbcProps.setProperty("password", "postgres");
         jdbcProps.setProperty("prepareThreshold", "0");
         conn = DriverManager.getConnection(jdbcUrl, jdbcProps);
         conn.setAutoCommit(false);
@@ -55,11 +57,11 @@ public abstract class TestSession {
     }
 
     protected static void createSchema() throws SQLException {
-        execute("CREATE SCHEMA IF NOT EXISTS public");
+        execute("CREATE SCHEMA IF NOT EXISTS jpalite");
     }
 
     protected static void dropSchema() throws SQLException {
-        execute("DROP SCHEMA IF EXISTS public CASCADE");
+        execute("DROP SCHEMA IF EXISTS jpalite CASCADE");
     }
 
 }

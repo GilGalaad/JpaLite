@@ -1,6 +1,6 @@
 package org.jpalite;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,7 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
 
-@Slf4j
+@Log4j2
 public class TestColumnProcessor extends TestSession {
 
     @DisplayName("Fetching string as scalar")

@@ -3,7 +3,7 @@ package org.jpalite;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 import org.jpalite.annotation.Column;
 import org.jpalite.annotation.Id;
 import org.jpalite.annotation.Table;
@@ -16,7 +16,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
+@Log4j2
 public class TestEntityManager extends TestSession {
 
     @DisplayName("Fetching no row")

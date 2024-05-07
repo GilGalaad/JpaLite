@@ -3,6 +3,7 @@ package org.jpalite;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import org.jpalite.annotation.Column;
 import org.junit.jupiter.api.Assertions;
@@ -14,7 +15,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
-@Slf4j
+@Log4j2
 public class TestRowProcessor extends TestSession {
 
     @DisplayName("Fetching single row as bean")

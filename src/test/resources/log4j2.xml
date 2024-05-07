@@ -3,19 +3,19 @@
     <Properties>
         <!-- presets -->
         <Property name="datetime_pattern" value="dd/MM/yyyy HH:mm:ss.SSS"/>
-        <Property name="no_pattern" value="%msg%n"/>
-        <Property name="simple_pattern" value="[%d{${sys:datetime_pattern}} %5level] %msg%n"/>
-        <Property name="standard_pattern" value="[%d{${sys:datetime_pattern}} %5level %logger{1}] %msg%n"/>
-        <Property name="location_pattern" value="[%d{${sys:datetime_pattern}} %5level %logger{1} %class{1}.%method:%line] %msg%n"/>
-        <!-- chosen pattern -->
-        <Property name="log.pattern" value="${sys:standard_pattern}"/>
+        <Property name="print_pattern" value="%msg%n"/>
+        <Property name="simple_pattern" value="%d{${sys:datetime_pattern}} | %-5p | %msg%n"/>
+        <Property name="standard_pattern" value="%d{${sys:datetime_pattern}} | %-5p | %-20c{1} | %msg%n"/>
     </Properties>
     <appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="${sys:log.pattern}"/>
+            <PatternLayout pattern="${sys:standard_pattern}"/>
         </Console>
     </appenders>
     <loggers>
+        <Logger name="io.grpc" level="ALL" additivity="false">
+            <appender-ref ref="Console" level="INFO"/>
+        </Logger>
         <root level="ALL">
             <appender-ref ref="Console" level="ALL"/>
         </root>
