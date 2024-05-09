@@ -9,11 +9,9 @@ import java.sql.SQLException;
 
 public class ScalarProcessor<T> implements RowProcessor<T> {
 
-    private final Class<T> clazz;
     private final ColumnMapping columnMapping;
 
     public ScalarProcessor(Class<T> clazz, ResultSetMetaData resultSetMetaData) throws SQLException {
-        this.clazz = clazz;
         this.columnMapping = new ColumnMapping();
         columnMapping.setColumnIndex(1);
         columnMapping.setColumnLabel(resultSetMetaData.getColumnLabel(1));

@@ -23,7 +23,7 @@ public class EntityManager {
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setFetchSize(fetchSize);
             ParameterMetaData parameterMetaData = stmt.getParameterMetaData();
-            StatementUtils.checkStatementParameters(stmt, parameterMetaData, params);
+            StatementUtils.checkStatementParameters(parameterMetaData, params);
             StatementUtils.setStatementParameters(stmt, parameterMetaData, params);
             try (ResultSet rs = stmt.executeQuery()) {
                 RowProcessor<T> rowProcessor = RowProcessorFactory.create(clazz, rs.getMetaData());
@@ -39,7 +39,7 @@ public class EntityManager {
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setFetchSize(2);
             ParameterMetaData parameterMetaData = stmt.getParameterMetaData();
-            StatementUtils.checkStatementParameters(stmt, parameterMetaData, params);
+            StatementUtils.checkStatementParameters(parameterMetaData, params);
             StatementUtils.setStatementParameters(stmt, parameterMetaData, params);
             try (ResultSet rs = stmt.executeQuery()) {
                 RowProcessor<T> rowProcessor = RowProcessorFactory.create(clazz, rs.getMetaData());
@@ -59,42 +59,42 @@ public class EntityManager {
     public long execute(Connection conn, String sql, Object... params) throws SQLException {
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             ParameterMetaData parameterMetaData = stmt.getParameterMetaData();
-            StatementUtils.checkStatementParameters(stmt, parameterMetaData, params);
+            StatementUtils.checkStatementParameters(parameterMetaData, params);
             StatementUtils.setStatementParameters(stmt, parameterMetaData, params);
             return stmt.executeLargeUpdate();
         }
     }
 
-    public void insert(Connection conn, Object obj) throws SQLException {
-        if (obj == null) {
+    public void insert(Connection conn, Object object) throws SQLException {
+        if (object == null) {
             throw new SQLException("Bean object is null");
         }
-        BeanProcessor<?> bp = new BeanProcessor<>(obj.getClass(), null);
+        BeanProcessor<?> bp = new BeanProcessor<>(object.getClass(), null);
         String sql = bp.generateInsertStatement();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             ParameterMetaData parameterMetaData = stmt.getParameterMetaData();
-            bp.setInsertParameters(stmt, parameterMetaData, obj);
+            bp.setInsertParameters(stmt, parameterMetaData, object);
             stmt.executeUpdate();
         }
     }
 
-    public void batchInsert(Connection conn, List<?> objs) throws SQLException {
-        if (objs == null || objs.isEmpty()) {
+    public void batchInsert(Connection conn, List<?> objects) throws SQLException {
+        if (objects == null || objects.isEmpty()) {
             throw new SQLException("Bean list is empty");
         }
-        for (var obj : objs) {
+        for (var obj : objects) {
             if (obj == null) {
                 throw new SQLException("Bean list contains null objects");
             }
-            if (!obj.getClass().equals(objs.get(0).getClass())) {
+            if (!obj.getClass().equals(objects.getFirst().getClass())) {
                 throw new SQLException("Bean list must contain objects of the same type");
             }
         }
-        BeanProcessor<?> bp = new BeanProcessor<>(objs.get(0).getClass(), null);
+        BeanProcessor<?> bp = new BeanProcessor<>(objects.getFirst().getClass(), null);
         String sql = bp.generateInsertStatement();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             ParameterMetaData pmd = stmt.getParameterMetaData();
-            for (var obj : objs) {
+            for (var obj : objects) {
                 bp.setInsertParameters(stmt, pmd, obj);
                 stmt.addBatch();
             }
@@ -102,15 +102,15 @@ public class EntityManager {
         }
     }
 
-    public void update(Connection conn, Object obj) throws SQLException {
-        if (obj == null) {
+    public void update(Connection conn, Object object) throws SQLException {
+        if (object == null) {
             throw new SQLException("Bean object is null");
         }
-        BeanProcessor<?> bp = new BeanProcessor<>(obj.getClass(), null);
+        BeanProcessor<?> bp = new BeanProcessor<>(object.getClass(), null);
         String sql = bp.generateUpdateStatement();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             ParameterMetaData pmd = stmt.getParameterMetaData();
-            bp.setUpdateParameters(stmt, pmd, obj);
+            bp.setUpdateParameters(stmt, pmd, object);
             stmt.executeUpdate();
         }
     }

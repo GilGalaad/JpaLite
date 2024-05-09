@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
 import org.jpalite.annotation.Column;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -34,22 +33,6 @@ public class TestRowProcessor extends TestSession {
         Assertions.assertEquals(expected, actual);
     }
 
-    @DisplayName("Fetching single row as array")
-    @Test
-    void testFetchSingleRowAsArray() throws SQLException {
-        log.info("Fetching single row as array");
-        String[] expected = new String[]{"test_value1", "test_value2"};
-        execute("CREATE TABLE IF NOT EXISTS test_table (col1 TEXT, col2 TEXT)");
-        try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?,?)")) {
-            stmt.setString(1, expected[0]);
-            stmt.setString(2, expected[1]);
-            stmt.executeUpdate();
-        }
-        conn.commit();
-        String[] actual = em.getSingleResult(conn, String[].class, "SELECT * FROM test_table LIMIT 1");
-        Assertions.assertArrayEquals(expected, actual);
-    }
-
     @DisplayName("Fetching multiple rows as list of beans")
     @Test
     void testFetchMultipleRowsAsListOfBeans() throws SQLException {
@@ -67,27 +50,6 @@ public class TestRowProcessor extends TestSession {
         conn.commit();
         List<TestBean> actual = em.getResultList(conn, TestBean.class, "SELECT * FROM test_table ORDER BY 1");
         Assertions.assertIterableEquals(expected, actual);
-    }
-
-    @DisplayName("Fetching multiple rows as list of arrays")
-    @Test
-    void testFetchMultipleRowsAsListOfArrays() throws SQLException {
-        log.info("Fetching multiple rows as list of arrays");
-        List<String[]> expected = Arrays.asList(new String[]{"test_value1", "test_value2"}, new String[]{"test_value3", "test_value4"});
-        execute("CREATE TABLE IF NOT EXISTS test_table (col1 TEXT, col2 TEXT)");
-        try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?,?)")) {
-            stmt.setString(1, expected.get(0)[0]);
-            stmt.setString(2, expected.get(0)[1]);
-            stmt.executeUpdate();
-            stmt.setString(1, expected.get(1)[0]);
-            stmt.setString(2, expected.get(1)[1]);
-            stmt.executeUpdate();
-        }
-        conn.commit();
-        List<String[]> actual = em.getResultList(conn, String[].class, "SELECT * FROM test_table ORDER BY 1");
-        for (int i = 0; i < actual.size(); i++) {
-            Assertions.assertArrayEquals(expected.get(i), actual.get(i));
-        }
     }
 
     @DisplayName("Fetching multiple rows as list of scalars")

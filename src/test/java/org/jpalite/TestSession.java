@@ -21,7 +21,7 @@ public abstract class TestSession {
 
     @BeforeAll
     protected static void init() throws SQLException {
-        log.info("Connecting to database");
+        log.debug("Connecting to database");
         String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", "localhost", 5432, "postgres");
         Properties jdbcProps = new Properties();
         jdbcProps.setProperty("user", "postgres");
@@ -38,7 +38,7 @@ public abstract class TestSession {
         if (conn != null) {
             dropSchema();
             createSchema();
-            log.info("Closing database connection");
+            log.debug("Closing database connection");
             conn.close();
         }
     }

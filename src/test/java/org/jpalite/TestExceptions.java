@@ -2,7 +2,6 @@ package org.jpalite;
 
 import lombok.*;
 import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
 import org.jpalite.annotation.Column;
 import org.jpalite.annotation.Id;
 import org.jpalite.annotation.Table;
@@ -45,21 +44,6 @@ public class TestExceptions extends TestSession {
         conn.commit();
         Exception ex = Assertions.assertThrows(SQLException.class, () -> em.getSingleResult(conn, int.class, "SELECT col1 FROM test_table LIMIT 1"));
         Assertions.assertEquals("Cannot assign null value to a primitive type for column col1", ex.getMessage());
-    }
-
-    @DisplayName("Fetching null value as primitive array")
-    @Test
-    void testFetchNullValueAsPrimitiveArray() throws SQLException {
-        log.info("Fetching null value as primitive array");
-        execute("CREATE TABLE IF NOT EXISTS test_table (col1 INTEGER, col2 INTEGER)");
-        try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?,?)")) {
-            stmt.setObject(1, 1);
-            stmt.setObject(2, null);
-            stmt.executeUpdate();
-        }
-        conn.commit();
-        Exception ex = Assertions.assertThrows(SQLException.class, () -> em.getSingleResult(conn, int[].class, "SELECT * FROM test_table LIMIT 1"));
-        Assertions.assertEquals("Cannot assign null value to a primitive type for column col2", ex.getMessage());
     }
 
     @DisplayName("Fetching null value as primitive in bean")

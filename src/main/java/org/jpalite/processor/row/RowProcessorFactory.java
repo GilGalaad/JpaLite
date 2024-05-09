@@ -9,9 +9,6 @@ public class RowProcessorFactory {
         if (resultSetMetaData.getColumnCount() == 1) {
             return new ScalarProcessor<>(clazz, resultSetMetaData);
         }
-        if (clazz.isArray()) {
-            return new ArrayProcessor<>(clazz, resultSetMetaData);
-        }
         return new BeanProcessor<>(clazz, resultSetMetaData);
     }
 

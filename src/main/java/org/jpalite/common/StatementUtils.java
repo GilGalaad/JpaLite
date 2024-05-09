@@ -9,7 +9,7 @@ public class StatementUtils {
     private StatementUtils() {
     }
 
-    public static void checkStatementParameters(PreparedStatement stmt, ParameterMetaData parameterMetaData, Object... params) throws SQLException {
+    public static void checkStatementParameters(ParameterMetaData parameterMetaData, Object... params) throws SQLException {
         int stmtCount = parameterMetaData.getParameterCount();
         int paramsCount = params == null ? 0 : params.length;
         if (stmtCount != paramsCount) {
