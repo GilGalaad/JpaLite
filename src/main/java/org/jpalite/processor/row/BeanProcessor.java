@@ -170,7 +170,7 @@ public class BeanProcessor<T> implements RowProcessor<T> {
     }
 
     private Field getFieldForColumn(List<Field> beanFields, String columnLabel) throws SQLException {
-        Field ret = beanFields.stream().filter(f -> f.getAnnotation(Column.class).name().equals(columnLabel)).findFirst().orElse(null);
+        Field ret = beanFields.stream().filter(f -> f.getAnnotation(Column.class).name().equalsIgnoreCase(columnLabel)).findFirst().orElse(null);
         if (ret == null) {
             throw new SQLException(String.format("No suitable field found in class %s to map column %s", beanFields.getFirst().getDeclaringClass().getSimpleName(), columnLabel));
         }

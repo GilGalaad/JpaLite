@@ -74,7 +74,7 @@ public class TestEntityManager extends TestSession {
     void testBatchInsert() throws SQLException {
         log.info("Batch inserting");
         long startTime, endTime;
-        int batchSize = 100_000;
+        int batchSize = 1_000_000;
         int count;
 
         execute("CREATE TABLE IF NOT EXISTS test_table (col1 INTEGER, col2 TEXT)");

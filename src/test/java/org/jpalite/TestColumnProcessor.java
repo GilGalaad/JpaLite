@@ -135,7 +135,7 @@ public class TestColumnProcessor extends TestSession {
     void testFetchFloatAsScalar() throws SQLException {
         log.info("Fetching float as scalar");
         Float expected = 3.14F;
-        execute("CREATE TABLE IF NOT EXISTS test_table (col1 DECIMAL)");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 DOUBLE PRECISION)");
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?)")) {
             stmt.setFloat(1, expected);
             stmt.executeUpdate();
@@ -153,7 +153,7 @@ public class TestColumnProcessor extends TestSession {
     void testFetchFloatAsPrimitiveScalar() throws SQLException {
         log.info("Fetching float as primitive scalar");
         float expected = 3.14F;
-        execute("CREATE TABLE IF NOT EXISTS test_table (col1 DECIMAL)");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 DOUBLE PRECISION)");
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?)")) {
             stmt.setFloat(1, expected);
             stmt.executeUpdate();
@@ -168,7 +168,7 @@ public class TestColumnProcessor extends TestSession {
     void testFetchDoubleAsScalar() throws SQLException {
         log.info("Fetching double as scalar");
         Double expected = 3.14D;
-        execute("CREATE TABLE IF NOT EXISTS test_table (col1 DECIMAL)");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 DOUBLE PRECISION)");
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?)")) {
             stmt.setDouble(1, expected);
             stmt.executeUpdate();
@@ -186,7 +186,7 @@ public class TestColumnProcessor extends TestSession {
     void testFetchDoubleAsPrimitiveScalar() throws SQLException {
         log.info("Fetching double as primitive scalar");
         double expected = 3.14D;
-        execute("CREATE TABLE IF NOT EXISTS test_table (col1 DECIMAL)");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 DOUBLE PRECISION)");
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?)")) {
             stmt.setDouble(1, expected);
             stmt.executeUpdate();
@@ -201,7 +201,7 @@ public class TestColumnProcessor extends TestSession {
     void testFetchBigDecimalAsScalar() throws SQLException {
         log.info("Fetching big decimal as scalar");
         BigDecimal expected = BigDecimal.valueOf(3.14D);
-        execute("CREATE TABLE IF NOT EXISTS test_table (col1 DECIMAL)");
+        execute("CREATE TABLE IF NOT EXISTS test_table (col1 DOUBLE PRECISION)");
         try (PreparedStatement stmt = conn.prepareStatement("INSERT INTO test_table VALUES (?)")) {
             stmt.setBigDecimal(1, expected);
             stmt.executeUpdate();

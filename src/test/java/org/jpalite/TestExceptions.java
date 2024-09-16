@@ -29,7 +29,7 @@ public class TestExceptions extends TestSession {
         }
         conn.commit();
         Exception ex = Assertions.assertThrows(SQLException.class, () -> em.getSingleResult(conn, Exception.class, "SELECT col1 FROM test_table LIMIT 1"));
-        Assertions.assertEquals("Unsupported column processor for class Exception", ex.getMessage());
+        Assertions.assertEquals("Unsupported column processor for class Exception".toLowerCase(), ex.getMessage().toLowerCase());
     }
 
     @DisplayName("Fetching null value as primitive scalar")
@@ -43,7 +43,7 @@ public class TestExceptions extends TestSession {
         }
         conn.commit();
         Exception ex = Assertions.assertThrows(SQLException.class, () -> em.getSingleResult(conn, int.class, "SELECT col1 FROM test_table LIMIT 1"));
-        Assertions.assertEquals("Cannot assign null value to a primitive type for column col1", ex.getMessage());
+        Assertions.assertEquals("Cannot assign null value to a primitive type for column col1".toLowerCase(), ex.getMessage().toLowerCase());
     }
 
     @DisplayName("Fetching null value as primitive in bean")
@@ -58,7 +58,7 @@ public class TestExceptions extends TestSession {
         }
         conn.commit();
         Exception ex = Assertions.assertThrows(SQLException.class, () -> em.getSingleResult(conn, TestBeanPrimitives.class, "SELECT * FROM test_table LIMIT 1"));
-        Assertions.assertEquals("Cannot assign null value to a primitive type for column col2", ex.getMessage());
+        Assertions.assertEquals("Cannot assign null value to a primitive type for column col2".toLowerCase(), ex.getMessage().toLowerCase());
     }
 
     @DisplayName("Fetching bean with wrong column number")
@@ -202,7 +202,7 @@ public class TestExceptions extends TestSession {
     @DisplayName("Inserting bean with no @Column annotation")
     @Test
     void testInsertBeanNoColumnAnnotation() {
-        log.info("Inserting bean with no @Table annotation");
+        log.info("Inserting bean with no @Column annotation");
         Exception ex = Assertions.assertThrows(SQLException.class, () -> em.insert(conn, new TestBeanNoColumnAnnotation()));
         Assertions.assertEquals("Bean class TestBeanNoColumnAnnotation has no @Column annotated fields", ex.getMessage());
     }
@@ -219,7 +219,7 @@ public class TestExceptions extends TestSession {
         }
         conn.commit();
         Exception ex = Assertions.assertThrows(SQLException.class, () -> em.getSingleResult(conn, TestBeanWrongColumnName.class, "SELECT * FROM test_table LIMIT 1"));
-        Assertions.assertEquals("No suitable field found in class TestBeanWrongColumnName to map column col2", ex.getMessage());
+        Assertions.assertEquals("No suitable field found in class TestBeanWrongColumnName to map column col2".toLowerCase(), ex.getMessage().toLowerCase());
     }
 
     @Data
@@ -258,15 +258,14 @@ public class TestExceptions extends TestSession {
 
     }
 
+    @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     public static class TestBeanNoSetter {
 
-        @Getter
         @Setter
         @Column(name = "col1")
         private String col1;
-        @Getter
         @Column(name = "col2")
         private Integer col2;
 

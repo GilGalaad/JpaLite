@@ -1,7 +1,6 @@
 package org.jpalite;
 
 import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -11,7 +10,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
 
 @Log4j2
 public abstract class TestSession {
@@ -22,12 +20,8 @@ public abstract class TestSession {
     @BeforeAll
     protected static void init() throws SQLException {
         log.debug("Connecting to database");
-        String jdbcUrl = String.format("jdbc:postgresql://%s:%s/%s", "localhost", 5432, "postgres");
-        Properties jdbcProps = new Properties();
-        jdbcProps.setProperty("user", "postgres");
-        jdbcProps.setProperty("password", "postgres");
-        jdbcProps.setProperty("prepareThreshold", "0");
-        conn = DriverManager.getConnection(jdbcUrl, jdbcProps);
+        String jdbcUrl = "jdbc:h2:mem:test_mem";
+        conn = DriverManager.getConnection(jdbcUrl);
         conn.setAutoCommit(false);
         dropSchema();
         createSchema();
