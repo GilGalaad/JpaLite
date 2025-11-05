@@ -11,7 +11,7 @@ public class StatementUtils {
 
     public static void checkStatementParameters(ParameterMetaData parameterMetaData, Object... params) throws SQLException {
         int stmtCount = parameterMetaData.getParameterCount();
-        int paramsCount = params == null ? 0 : params.length;
+        int paramsCount = params.length;
         if (stmtCount != paramsCount) {
             throw new SQLException(String.format("Query needs %d parameters but %d were provided", stmtCount, paramsCount));
         }
