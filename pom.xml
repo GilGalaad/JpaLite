@@ -12,11 +12,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>21</maven.compiler.release>
         <maven.version.ignore>(?i).*(-|\.)(alpha|beta|m|rc|cr)(-?\d+)?</maven.version.ignore>
-        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
-        <lombok.version>1.18.34</lombok.version>
-        <log4j.version>2.24.0</log4j.version>
-        <junit.version>5.11.0</junit.version>
-        <h2.version>2.3.232</h2.version>
+        <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
+        <lombok.version>1.18.42</lombok.version>
+        <log4j.version>2.25.2</log4j.version>
+        <junit.version>6.0.1</junit.version>
+        <h2.version>2.4.240</h2.version>
     </properties>
 
     <dependencies>
